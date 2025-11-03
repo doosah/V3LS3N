@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="src/css/theme.css">
     <link rel="stylesheet" href="src/css/tables.css">
     <link rel="stylesheet" href="src/css/logos.css">
+    <link rel="stylesheet" href="src/css/date-navigation.css">
     <link rel="stylesheet" href="src/css/responsive.css">
 </head>
 <body>
@@ -126,12 +127,12 @@
 
         <div id="summaryTableSection" class="section">
             <h2>📋 Сводная таблица</h2>
-            <div class="date-section">
-                <div style="display:flex;flex-direction:column;gap:10px">
-                    <button class="secondary" onclick="prevSummaryDay()">← Предыдущий день</button>
-                    <div style="text-align:center;font-size:clamp(16px,4vw,18px);font-weight:600;color:#c7d2fe;padding:10px" id="currentSummaryDate"></div>
-                    <button class="secondary" onclick="nextSummaryDay()">Следующий день →</button>
-                </div>
+            <div class="date-navigation">
+                <button class="date-nav-btn" onclick="prevSummaryDay()">← Предыдущий день</button>
+                <div class="date-display" id="currentSummaryDate"></div>
+                <button class="date-nav-btn" onclick="nextSummaryDay()">Следующий день →</button>
+                <button class="date-arrow-btn" onclick="prevSummaryDay()">←</button>
+                <button class="date-arrow-btn" onclick="nextSummaryDay()">→</button>
             </div>
             <div id="summaryTable"></div>
             <div class="action-buttons">
@@ -165,12 +166,12 @@
 
         <div id="personnelSummaryTableSection" class="section">
             <h2>📋 Сводная таблица по персоналу</h2>
-            <div class="date-section">
-                <div style="display:flex;flex-direction:column;gap:10px">
-                    <button class="secondary" onclick="prevPersonnelSummaryDay()">← Предыдущий день</button>
-                    <div style="text-align:center;font-size:clamp(16px,4vw,18px);font-weight:600;color:#c7d2fe;padding:10px" id="currentPersonnelSummaryDate"></div>
-                    <button class="secondary" onclick="nextPersonnelSummaryDay()">Следующий день →</button>
-                </div>
+            <div class="date-navigation">
+                <button class="date-nav-btn" onclick="prevPersonnelSummaryDay()">← Предыдущий день</button>
+                <div class="date-display" id="currentPersonnelSummaryDate"></div>
+                <button class="date-nav-btn" onclick="nextPersonnelSummaryDay()">Следующий день →</button>
+                <button class="date-arrow-btn" onclick="prevPersonnelSummaryDay()">←</button>
+                <button class="date-arrow-btn" onclick="nextPersonnelSummaryDay()">→</button>
             </div>
             <div id="personnelSummaryTable"></div>
             <div class="action-buttons">
