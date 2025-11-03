@@ -290,11 +290,36 @@ async function sendFinalReport(dateISO, shiftType) {
 }
 
 /**
+ * Тестовая отправка сообщения (для проверки работы)
+ */
+async function testSendMessage() {
+    console.log('🧪 Тестовая отправка сообщения...');
+    const testMessage = `🧪 <b>Тестовое сообщение</b>\n\n` +
+                       `✅ Планировщик работает!\n` +
+                       `📅 Дата: ${getCurrentDate()}\n` +
+                       `⏰ Время: ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}\n\n` +
+                       `Сервер запущен и готов к работе.`;
+    
+    const result = await sendTelegramMessage(testMessage);
+    if (result) {
+        console.log('✅ Тестовое сообщение отправлено успешно!');
+    } else {
+        console.error('❌ Ошибка отправки тестового сообщения');
+    }
+    return result;
+}
+
+/**
  * Планировщик задач
  */
 console.log('🚀 Telegram Bot Scheduler запущен');
 console.log(`📅 Текущая дата: ${getCurrentDate()}`);
 console.log(`⏰ Текущее время (МСК): ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}`);
+console.log(`💬 Chat ID: ${TELEGRAM_CHAT_ID}`);
+console.log(`🔗 Supabase URL: ${SUPABASE_URL ? '✓ Настроен' : '✗ Не настроен'}`);
+
+// Отправка тестового сообщения при запуске (можно закомментировать после проверки)
+// testSendMessage().catch(console.error);
 
 // Дневная смена - напоминание в 07:45
 cron.schedule('45 7 * * *', async () => {
@@ -335,14 +360,31 @@ cron.schedule('0 22 * * *', async () => {
 // Health check endpoint (для облачных платформ)
 const PORT = process.env.PORT || 3000;
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
     if (req.url === '/health' || req.url === '/') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
             status: 'ok', 
             date: getCurrentDate(),
-            time: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })
+            time: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }),
+            chat_id: TELEGRAM_CHAT_ID,
+            supabase_configured: !!SUPABASE_URL && SUPABASE_URL !== 'YOUR_SUPABASE_URL'
         }));
+    } else if (req.url === '/test' && req.method === 'GET') {
+        // Тестовый endpoint для проверки отправки сообщения
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        try {
+            const result = await testSendMessage();
+            res.end(JSON.stringify({ 
+                status: result ? 'success' : 'error',
+                message: result ? 'Тестовое сообщение отправлено' : 'Ошибка отправки'
+            }));
+        } catch (error) {
+            res.end(JSON.stringify({ 
+                status: 'error',
+                message: error.message
+            }));
+        }
     } else {
         res.writeHead(404);
         res.end('Not found');

@@ -1,25 +1,9 @@
 {
-  "name": "v3ls3n-dashboard",
+  "name": "v3ls3n-root",
   "version": "1.0.0",
-  "description": "Modern warehouse management system dashboard",
-  "main": "index.html",
+  "description": "Root package for V3LS3N",
   "scripts": {
-    "dev": "live-server --port=3000",
-    "build": "echo 'No build process required'",
-    "deploy": "gh-pages -d ."
-  },
-  "keywords": [
-    "warehouse",
-    "dashboard",
-    "management"
-  ],
-  "author": "V3LS3N Team",
-  "license": "MIT",
-  "devDependencies": {
-    "gh-pages": "^6.0.0",
-    "live-server": "^1.2.2"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.78.0"
+    "start": "cd server && npm start",
+    "install-server": "cd server && npm install"
   }
 }
