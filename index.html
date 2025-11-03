@@ -2,259 +2,212 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V3LS3N | Система учёта складов</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
-            color: white;
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 10px;
-            font-size: 16px;
-            width: 100%;
-        }
-        button:hover {
-            background: #5a6fd8;
-        }
-        .section {
-            display: none;
-        }
-        .active {
-            display: block;
-        }
-        .warehouse-list {
-            display: grid;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        .warehouse-btn {
-            background: rgba(102, 126, 234, 0.3);
-            border: 1px solid rgba(135, 150, 200, 0.3);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #43e97b;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            z-index: 1000;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Сводные данные | Система учёта</title>
+    
+    <!-- CSS Modules -->
+    <link rel="stylesheet" href="src/css/variables.css">
+    <link rel="stylesheet" href="src/css/base.css">
+    <link rel="stylesheet" href="src/css/layout.css">
+    <link rel="stylesheet" href="src/css/components.css">
+    <link rel="stylesheet" href="src/css/theme.css">
+    <link rel="stylesheet" href="src/css/tables.css">
+    <link rel="stylesheet" href="src/css/responsive.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 V3LS3N - Система учёта складов</h1>
-            <p>Стабильная рабочая версия</p>
-        </div>
-
-        <!-- Главное меню -->
-        <div id="mainSection" class="section active">
-            <h2>Выберите отчёт</h2>
-            <button onclick="showSection('warehouseSection')">📄 Операционные показатели</button>
-            <button onclick="showSection('personnelSection')">📊 Персонал</button>
-            <button onclick="showSection('summarySection')">📋 Сводная таблица</button>
-        </div>
-
-        <!-- Операционные отчёты -->
-        <div id="warehouseSection" class="section">
-            <h2>📦 Отчёт по складу</h2>
-            <div class="warehouse-list" id="warehouseList"></div>
-            <button onclick="showSection('mainSection')">← Назад в главное меню</button>
-        </div>
-
-        <!-- Персонал -->
-        <div id="personnelSection" class="section">
-            <h2>👥 Отчёт по персоналу</h2>
-            <p>Функционал в разработке</p>
-            <button onclick="showSection('mainSection')">← Назад в главное меню</button>
-        </div>
-
-        <!-- Сводная таблица -->
-        <div id="summarySection" class="section">
-            <h2>📊 Сводная таблица</h2>
-            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; margin: 20px 0;">
-                <h3>Данные по всем складам</h3>
-                <p>Общая сводка по операционным показателям</p>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px;">
-                    <div style="background: rgba(102,126,234,0.3); padding: 15px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 24px;">14</div>
-                        <div>Складов</div>
-                    </div>
-                    <div style="background: rgba(67,233,123,0.3); padding: 15px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 24px;">28</div>
-                        <div>Смен</div>
-                    </div>
-                    <div style="background: rgba(250,112,154,0.3); padding: 15px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 24px;">2</div>
-                        <div>Руководителя</div>
-                    </div>
+            <div class="header-inner">
+                <img src="img/logo.png" alt="V3LS3N Logo" class="logo">
+                <div class="header-text">
+                    <h1>📊 Сводные данные</h1>
+                    <div class="subtitle">Система учёта и аналитики складских операций</div>
                 </div>
             </div>
-            <button onclick="showSection('mainSection')">← Назад в главное меню</button>
         </div>
+
+        <div id="mainSection" class="section active">
+            <h2>Выберите отчёт</h2>
+            <button class="large-button" onclick="selectReport('operational')">📄 Операционные показатели</button>
+            <button class="large-button" onclick="selectReport('personnel')">📊 Персонал</button>
+        </div>
+
+        <div id="warehouseReportSection" class="section">
+            <h2 id="warehouseTitle">Отчёт по складу</h2>
+            <div class="warehouse-list" id="warehouseList"></div>
+            <div class="action-buttons" style="margin-top: 20px;">
+                <button class="secondary large-button" onclick="showSummarySection()">📋 Сводная таблица</button>
+                <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+            </div>
+            <div class="date-section hidden">
+                <h3>📅 Выберите дату</h3>
+                <div class="calendar-controls">
+                    <button class="secondary" onclick="prevPeriod()">← Предыдущий</button>
+                    <button class="secondary" onclick="toggleCalendarView()">
+                        <span id="warehouseViewToggleText">📅 Неделя</span>
+                    </button>
+                    <button class="secondary" onclick="nextPeriod()">Следующий →</button>
+                </div>
+                <div id="warehouseCalendar" class="calendar"></div>
+                <div id="selectedWarehouseDate" class="selected-date-display"></div>
+            </div>
+            <div class="radio-group hidden">
+                <label><input type="radio" name="warehouseReportType" value="day" checked> ☀️ Дневная смена</label>
+                <label><input type="radio" name="warehouseReportType" value="night"> 🌙 Ночная смена</label>
+            </div>
+            <form id="reportForm" class="hidden">
+                <div id="categoryInputs"></div>
+                <div class="action-buttons">
+                    <button type="button" onclick="saveWarehouseReport()">💾 Сохранить отчёт</button>
+                    <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="personnelReportSection" class="section">
+            <h2 id="personnelTitle">Отчёт по персоналу</h2>
+            <div class="warehouse-list" id="personnelList"></div>
+            <div class="action-buttons" style="margin-top: 20px;">
+                <button class="secondary large-button" onclick="showPersonnelSummarySection()">📋 Сводная таблица</button>
+                <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+            </div>
+            <div class="date-section hidden">
+                <h3>📅 Выберите дату</h3>
+                <div class="calendar-controls">
+                    <button class="secondary" onclick="prevPeriodPersonnel()">← Предыдущий</button>
+                    <button class="secondary" onclick="toggleCalendarViewPersonnel()">
+                        <span id="personnelViewToggleText">📅 Неделя</span>
+                    </button>
+                    <button class="secondary" onclick="nextPeriodPersonnel()">Следующий →</button>
+                </div>
+                <div id="personnelCalendar" class="calendar"></div>
+                <div id="selectedPersonnelDate" class="selected-date-display"></div>
+            </div>
+            <div class="radio-group hidden">
+                <label><input type="radio" name="personnelReportType" value="day" checked> ☀️ Дневная смена</label>
+                <label><input type="radio" name="personnelReportType" value="night"> 🌙 Ночная смена</label>
+            </div>
+            <form id="personnelReportForm" class="hidden">
+                <div id="personnelCategoryInputs"></div>
+                <div class="action-buttons">
+                    <button type="button" onclick="savePersonnelReport()">💾 Сохранить отчёт</button>
+                    <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="summarySection" class="section">
+            <h2>📊 Общий свод по всем складам</h2>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="summaryDay" checked> ☀️ Дневные смены</label>
+                <label><input type="checkbox" id="summaryNight"> 🌙 Ночные смены</label>
+            </div>
+            <div class="filter-section">
+                <h4>👤 Фильтр по руководителю</h4>
+                <select id="managerFilter" onchange="updateSummaryTable()">
+                    <option value="">Все руководители</option>
+                    <option value="Территория 1 Шутин Д.М.">Территория 1 Шутин Д.М.</option>
+                    <option value="Территория 2 Любавкская М.И.">Территория 2 Любавкская М.И.</option>
+                </select>
+            </div>
+            <div class="date-section">
+                <h3>📅 Выберите дату для анализа</h3>
+                <div class="calendar-controls">
+                    <button class="secondary" onclick="prevPeriodSummary()">← Предыдущий</button>
+                    <button class="secondary" onclick="toggleCalendarViewSummary()">
+                        <span id="summaryViewToggleText">📆 Месяц</span>
+                    </button>
+                    <button class="secondary" onclick="nextPeriodSummary()">Следующий →</button>
+                </div>
+                <div id="summaryCalendar" class="calendar"></div>
+            </div>
+            <div class="action-buttons">
+                <button onclick="showSummaryData()">📈 Показать сводные данные</button>
+                <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+            </div>
+        </div>
+
+        <div id="summaryTableSection" class="section">
+            <h2>📋 Сводная таблица</h2>
+            <div class="date-section">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                    <button class="secondary" onclick="prevSummaryDay()">← Предыдущий день</button>
+                    <div style="text-align:center;font-size:clamp(16px,4vw,18px);font-weight:600;color:#c7d2fe;padding:10px" id="currentSummaryDate"></div>
+                    <button class="secondary" onclick="nextSummaryDay()">Следующий день →</button>
+                </div>
+            </div>
+            <div id="summaryTable"></div>
+            <div class="action-buttons">
+                <button onclick="toggleFullScreen()">🖥️ Полный экран</button>
+                <button class="secondary" onclick="showSummarySection()">← Назад</button>
+            </div>
+        </div>
+
+        <div id="personnelSummarySection" class="section">
+            <h2>📊 Общий свод по персоналу</h2>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="personnelSummaryDay" checked> ☀️ Дневные смены</label>
+                <label><input type="checkbox" id="personnelSummaryNight"> 🌙 Ночные смены</label>
+            </div>
+            <div class="filter-section">
+                <h4>👤 Фильтр по руководителю</h4>
+                <select id="personnelManagerFilter" onchange="updatePersonnelSummaryTable()">
+                    <option value="">Все руководители</option>
+                    <option value="Территория 1 Шутин Д.М.">Территория 1 Шутин Д.М.</option>
+                    <option value="Территория 2 Любавкская М.И.">Территория 2 Любавкская М.И.</option>
+                </select>
+            </div>
+            <div class="date-section">
+                <h3>📅 Выберите дату для анализа</h3>
+                <div class="calendar-controls">
+                    <button class="secondary" onclick="prevPeriodPersonnelSummary()">← Предыдущий</button>
+                    <button class="secondary" onclick="toggleCalendarViewPersonnelSummary()">
+                        <span id="personnelSummaryViewToggleText">📆 Месяц</span>
+                    </button>
+                    <button class="secondary" onclick="nextPeriodPersonnelSummary()">Следующий →</button>
+                </div>
+                <div id="personnelSummaryCalendar" class="calendar"></div>
+            </div>
+            <div class="action-buttons">
+                <button onclick="showPersonnelSummaryData()">📈 Показать сводные данные</button>
+                <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+            </div>
+        </div>
+
+        <div id="personnelSummaryTableSection" class="section">
+            <h2>📋 Сводная таблица по персоналу</h2>
+            <div class="date-section">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                    <button class="secondary" onclick="prevPersonnelSummaryDay()">← Предыдущий день</button>
+                    <div style="text-align:center;font-size:clamp(16px,4vw,18px);font-weight:600;color:#c7d2fe;padding:10px" id="currentPersonnelSummaryDate"></div>
+                    <button class="secondary" onclick="nextPersonnelSummaryDay()">Следующий день →</button>
+                </div>
+            </div>
+            <div id="personnelSummaryTable"></div>
+            <div class="action-buttons">
+                <button onclick="togglePersonnelFullScreen()">🖥️ Полный экран</button>
+                <button class="secondary" onclick="showPersonnelSummarySection()">← Назад</button>
+            </div>
+        </div>
+
+        <div id="fullScreenTable" class="full-screen-table" style="display:none">
+            <button class="close-full" onclick="toggleFullScreen()">✕ Закрыть</button>
+            <div id="fullSummaryTable"></div>
+        </div>
+
+        <div id="fullPersonnelScreenTable" class="full-screen-table" style="display:none">
+            <button class="close-full" onclick="togglePersonnelFullScreen()">✕ Закрыть</button>
+            <div id="fullPersonnelSummaryTable"></div>
+        </div>
+
+        <div id="console-output"></div>
     </div>
 
-    <script>
-        console.log('🚀 V3LS3N запускается...');
-
-        // Данные складов
-        const warehouses = [
-            "АРХАНГЕЛЬСК_ХАБ_НАХИМОВА",
-            "МУРМАНСК_ХАБ_ОБЪЕЗДНАЯ", 
-            "ВЕЛИКИЙ_НОВГОРОД_ХАБ_НЕХИНСКАЯ",
-            "ПЕТРОЗАВОДСК_ХАБ_ПРЯЖИНСКОЕ",
-            "ПСКОВ_ХАБ_МАРГЕЛОВА",
-            "ПСКОВ_ХАБ_НОВЫЙ",
-            "СЫКТЫВКАР_ХАБ_ЛЕСОПАРКОВАЯ",
-            "СЫКТЫВКАР_ХАБ_ОКТЯБРЬСКИЙ",
-            "ЧЕРЕПОВЕЦ_ХАБ_СТРОЙИНДУСТРИИ",
-            "ВОЛОГДА_ХАБ_БЕЛОЗЕРСКОЕ",
-            "СПБ_ХАБ_Осиновая Роща",
-            "СПБ_Хаб_Парголово",
-            "СПБ_Хаб_Парголово_Блок_3",
-            "СПБ_Хаб_Парголово_Блок_4"
-        ];
-
-        // Функция переключения разделов с проверкой ошибок
-        function showSection(sectionName) {
-            console.log('Переключение на раздел:', sectionName);
-            
-            try {
-                // Скрыть все разделы
-                document.querySelectorAll('.section').forEach(section => {
-                    if (section && section.classList) {
-                        section.classList.remove('active');
-                    }
-                });
-                
-                // Показать выбранный раздел
-                const targetSection = document.getElementById(sectionName);
-                if (targetSection && targetSection.classList) {
-                    targetSection.classList.add('active');
-                } else {
-                    throw new Error('Раздел не найден: ' + sectionName);
-                }
-                
-                // Если выбран раздел складов - загрузить список
-                if (sectionName === 'warehouseSection') {
-                    loadWarehouses();
-                }
-            } catch (error) {
-                console.error('Ошибка при переключении раздела:', error);
-                showNotification('Ошибка: ' + error.message, 'error');
-            }
-        }
-
-        // Загрузка списка складов
-        function loadWarehouses() {
-            console.log('Загрузка списка складов...');
-            const list = document.getElementById('warehouseList');
-            if (!list) {
-                console.error('Элемент warehouseList не найден');
-                return;
-            }
-            
-            list.innerHTML = '';
-            
-            warehouses.forEach(warehouse => {
-                const button = document.createElement('button');
-                button.className = 'warehouse-btn';
-                button.textContent = warehouse;
-                button.onclick = function() {
-                    selectWarehouse(warehouse);
-                };
-                list.appendChild(button);
-            });
-            
-            console.log('Список складов загружен');
-        }
-
-        // Выбор склада
-        function selectWarehouse(warehouse) {
-            console.log('Выбран склад:', warehouse);
-            showNotification('Выбран склад: ' + warehouse, 'info');
-            
-            // Здесь можно добавить логику загрузки данных по складу
-        }
-
-        // Показать уведомление
-        function showNotification(message, type = 'info') {
-            console.log('Уведомление:', message);
-            
-            const colors = {
-                info: '#667eea',
-                success: '#43e97b',
-                warning: '#f093fb',
-                error: '#fa709a'
-            };
-            
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.style.background = colors[type] || colors.info;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                if (document.body.contains(notification)) {
-                    document.body.removeChild(notification);
-                }
-            }, 3000);
-        }
-
-        // Инициализация при загрузке
-        window.addEventListener('load', function() {
-            console.log('✅ V3LS3N успешно загружен!');
-            console.log('📍 URL:', window.location.href);
-            
-            // Показываем уведомление о успешной загрузке
-            setTimeout(() => {
-                showNotification('✅ V3LS3N готов к работе!', 'success');
-            }, 500);
-        });
-
-        // Обработка ошибок
-        window.addEventListener('error', function(e) {
-            console.error('❌ Ошибка в приложении:', e.error);
-            showNotification('Произошла ошибка: ' + e.error.message, 'error');
-        });
-
-        // Глобальная обработка необработанных обещаний
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('❌ Необработанное обещание:', e.reason);
-            showNotification('Ошибка Promise: ' + e.reason, 'error');
-        });
-
-        console.log('✅ Скрипт инициализирован, ожидаем загрузки DOM...');
-    </script>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- JavaScript Modules -->
+    <script type="module" src="src/js/app.js"></script>
 </body>
 </html>

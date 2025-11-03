@@ -1,0 +1,17 @@
+/* CSS Variables */
+:root {
+    --primary-color: #667eea;
+    --primary-dark: #764ba2;
+    --secondary-color: #f093fb;
+    --accent-color: #4facfe;
+    --success-color: #43e97b;
+    --error-color: #fa709a;
+    --bg-dark: #0a0e27;
+    --bg-darker: #1a1f3a;
+    --bg-container: rgba(10, 14, 39, 0.85);
+    --text-primary: #f0f4ff;
+    --text-secondary: #c8d2e8;
+    --border-color: rgba(135, 150, 200, 0.15);
+    --touch-target: 44px;
+}
+

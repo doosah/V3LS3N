@@ -1,0 +1,86 @@
+/* Layout Styles */
+.section {
+    padding: 20px;
+    display: none;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-size: 200% 200%;
+    animation: gradientFlow 8s ease infinite;
+    border-bottom: 1px solid rgba(135, 150, 200, 0.2);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    padding: 16px 20px;
+}
+
+.header-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.warehouse-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.filter-section {
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(240, 147, 251, 0.1) 100%);
+    border: 1px solid rgba(135, 150, 200, 0.2);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15),
+                0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.date-section {
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(30, 35, 60, 0.4) 0%, rgba(45, 27, 61, 0.4) 100%);
+    border: 1px solid rgba(135, 150, 200, 0.15);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2),
+                0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.table-wrapper {
+    border: 1px solid rgba(135, 150, 200, 0.2);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2),
+                0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.full-screen-table {
+    background: rgba(10, 14, 39, 0.98);
+    backdrop-filter: blur(20px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    overflow: auto;
+    padding: 20px;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+}
+

@@ -1,0 +1,52 @@
+/* Responsive Styles */
+@media (max-width: 768px) {
+    body { padding: 8px; }
+    .container { border-radius: 16px; }
+    .header { padding: 16px; }
+    .section { padding: 16px; }
+    .warehouse-list { grid-template-columns: 1fr; gap: 10px; }
+    .calendar-controls { flex-direction: column; }
+    .calendar-controls button { width: 100%; }
+    button { font-size: 14px; padding: 12px 20px; }
+    table { font-size: 7px; transform: scale(0.9); width: calc(100% / 0.9); }
+    td:first-child, th:first-child { width: 60px; min-width: 60px; max-width: 60px; }
+    td:nth-child(2), th:nth-child(2) { width: 120px; min-width: 120px; max-width: 120px; left: 60px; }
+    th:nth-child(n+3), td:nth-child(n+3) { min-width: 30px; max-width: 40px; padding: 2px 1px; }
+    .close-full { top: 10px; right: 10px; padding: 12px 20px; }
+}
+
+@media (max-width: 480px) {
+    .warehouse-btn { font-size: 12px; padding: 14px; }
+    h1 { font-size: 20px; }
+    h2 { font-size: 18px; }
+    button { font-size: 14px; padding: 12px 20px; }
+    table { font-size: 6px; transform: scale(0.85); width: calc(100% / 0.85); }
+    td:first-child, th:first-child { width: 55px; min-width: 55px; max-width: 55px; }
+    td:nth-child(2), th:nth-child(2) { width: 110px; min-width: 110px; max-width: 110px; left: 55px; }
+    .logo { height: 32px; }
+}
+
+@media (orientation: portrait) {
+    .table-wrapper {
+        max-width: 100%;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .header { padding: 12px 16px; }
+    .section { padding: 12px; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    h2 { font-size: 18px; margin-bottom: 12px; }
+}
+
+@media (min-width: 1400px) {
+    .warehouse-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    table {
+        font-size: 10px;
+        transform: scale(1);
+        width: 100%;
+    }
+}
+

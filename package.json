@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "v3ls3n-dashboard",
   "version": "1.0.0",
   "description": "Modern warehouse management system dashboard",
@@ -8,11 +8,18 @@
     "build": "echo 'No build process required'",
     "deploy": "gh-pages -d ."
   },
-  "keywords": ["warehouse", "dashboard", "management"],
+  "keywords": [
+    "warehouse",
+    "dashboard",
+    "management"
+  ],
   "author": "V3LS3N Team",
   "license": "MIT",
   "devDependencies": {
-    "live-server": "^1.2.2",
-    "gh-pages": "^6.0.0"
+    "gh-pages": "^6.0.0",
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.78.0"
   }
 }

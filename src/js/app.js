@@ -1,232 +1,536 @@
-﻿// ========== УПРОЩЕННОЕ ПРИЛОЖЕНИЕ V3LS3N ==========
-console.log('🚀 V3LS3N App инициализация...');
+﻿// Главный модуль приложения
+import { WAREHOUSES, CATEGORIES, PERSONNEL_CATEGORIES } from './config.js';
+import { syncToSupabase, loadFromSupabase, setupRealtimeSubscriptions, initSupabase } from './supabase-client.js';
+import { parseTimeToMin, cleanOldReports } from './utils.js';
+import { renderCalendar } from './calendar.js';
+import { loadCategoryInputs, loadPersonnelCategoryInputs, selectYesNo } from './forms.js';
+import { generateSummaryTable, generatePersonnelSummaryTable } from './tables.js';
 
-class SimpleV3LS3NApp {
-    constructor() {
-        console.log('🎯 Конструктор V3LS3N App...');
-        this.state = {
-            currentSection: 'main',
-            warehouses: [
-                "АРХАНГЕЛЬСК_ХАБ_НАХИМОВА",
-                "МУРМАНСК_ХАБ_ОБЪЕЗДНАЯ",
-                "ВЕЛИКИЙ_НОВГОРОД_ХАБ_НЕХИНСКАЯ",
-                "ПЕТРОЗАВОДСК_ХАБ_ПРЯЖИНСКОЕ",
-                "ПСКОВ_ХАБ_МАРГЕЛОВА",
-                "ПСКОВ_ХАБ_НОВЫЙ",
-                "СЫКТЫВКАР_ХАБ_ЛЕСОПАРКОВАЯ",
-                "СЫКТЫВКАР_ХАБ_ОКТЯБРЬСКИЙ",
-                "ЧЕРЕПОВЕЦ_ХАБ_СТРОЙИНДУСТРИИ",
-                "ВОЛОГДА_ХАБ_БЕЛОЗЕРСКОЕ",
-                "СПБ_ХАБ_Осиновая Роща",
-                "СПБ_Хаб_Парголово",
-                "СПБ_Хаб_Парголово_Блок_3",
-                "СПБ_Хаб_Парголово_Блок_4"
-            ]
-        };
-        
-        // Автоматически инициализируем при создании
-        this.initialize();
-    }
-    
-    initialize() {
-        console.log('🎯 Инициализация приложения...');
-        this.renderApp();
-        this.setupEventListeners();
-        console.log('✅ Приложение запущено!');
-    }
-    
-    renderApp() {
-        const appContainer = document.getElementById('app');
-        if (!appContainer) {
-            console.error('❌ Контейнер app не найден');
-            return;
-        }
-        
-        appContainer.innerHTML = \`
-            <div class="container">
-                <div class="header">
-                    <div class="header-inner">
-                        <div class="logo">V3LS3N</div>
-                        <div class="header-text">
-                            <h1>📊 Сводные данные</h1>
-                            <div class="subtitle">Система учёта и аналитики складских операций</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="mainSection" class="section active">
-                    <h2>Выберите отчёт</h2>
-                    <button class="large-button" onclick="app.selectReport('operational')">
-                        📄 Операционные показатели
-                    </button>
-                    <button class="large-button" onclick="app.selectReport('personnel')">
-                        📊 Персонал
-                    </button>
-                    
-                    <div style="margin-top: 30px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                        <h3>📈 Статус системы</h3>
-                        <p>✅ JavaScript работает</p>
-                        <p>✅ Стили загружены</p>
-                        <p>✅ Навигация активна</p>
-                    </div>
-                </div>
-                
-                <div id="warehouseReportSection" class="section">
-                    <h2>📦 Отчёт по складу</h2>
-                    <div class="warehouse-list" id="warehouseList"></div>
-                    <div class="action-buttons">
-                        <button class="secondary large-button" onclick="app.showSummarySection()">
-                            📋 Сводная таблица
-                        </button>
-                        <button class="secondary" onclick="app.backToMain()">
-                            ← Назад к выбору отчёта
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="summarySection" class="section">
-                    <h2>📊 Сводная таблица</h2>
-                    <div class="content" style="padding: 20px; background: rgba(255,255,255,0.1); border-radius: 12px;">
-                        <h3>Данные по всем складам</h3>
-                        <p>Здесь будет отображаться общая сводка по операционным показателям.</p>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
-                            <div style="background: rgba(102,126,234,0.3); padding: 15px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 24px;">14</div>
-                                <div>Складов</div>
-                            </div>
-                            <div style="background: rgba(67,233,123,0.3); padding: 15px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 24px;">28</div>
-                                <div>Смен</div>
-                            </div>
-                            <div style="background: rgba(250,112,154,0.3); padding: 15px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 24px;">2</div>
-                                <div>Руководителя</div>
-                            </div>
-                        </div>
-                        <button class="secondary" style="margin-top: 20px;" onclick="app.backToMain()">← Назад</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="console-output" style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: lime; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px; max-width: 300px; max-height: 150px; overflow-y: auto;">
-                <strong>Консоль отладки:</strong>
-                <div id="console-messages"></div>
-            </div>
-        \`;
-        
-        this.generateWarehouseList();
-        this.log('Приложение отрендерено');
-    }
-    
-    generateWarehouseList() {
-        const listContainer = document.getElementById('warehouseList');
-        if (!listContainer) return;
-        
-        listContainer.innerHTML = '';
-        this.state.warehouses.forEach(warehouse => {
-            const button = document.createElement('button');
-            button.className = 'warehouse-btn';
-            button.textContent = warehouse;
-            button.onclick = () => this.selectWarehouse(warehouse);
-            listContainer.appendChild(button);
-        });
-        
-        this.log(\`Сгенерирован список из \${this.state.warehouses.length} складов\`);
-    }
-    
-    selectReport(reportType) {
-        this.hideAllSections();
-        
-        switch(reportType) {
-            case 'operational':
-                document.getElementById('warehouseReportSection').classList.add('active');
-                this.log('Выбран операционный отчёт');
-                break;
-            case 'personnel':
-                this.showMessage('Функционал отчётов по персоналу в разработке');
-                this.log('Выбран отчёт по персоналу (в разработке)');
-                break;
-        }
-    }
-    
-    selectWarehouse(warehouse) {
-        this.log(\`Выбран склад: \${warehouse}\`);
-        this.showMessage(\`Открывается отчёт для склада: \${warehouse}\`);
-    }
-    
-    showSummarySection() {
-        this.hideAllSections();
-        document.getElementById('summarySection').classList.add('active');
-        this.log('Открыта сводная таблица');
-    }
-    
-    backToMain() {
-        this.hideAllSections();
-        document.getElementById('mainSection').classList.add('active');
-        this.log('Возврат в главное меню');
-    }
-    
-    hideAllSections() {
-        document.querySelectorAll('.section').forEach(section => {
-            section.classList.remove('active');
-        });
-    }
-    
-    showMessage(message) {
-        this.log(message);
-        // Временное уведомление
-        const notification = document.createElement('div');
-        notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #667eea; color: white; padding: 15px; border-radius: 8px; z-index: 1000;';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 3000);
-    }
-    
-    log(message) {
-        console.log(\`[V3LS3N] \${message}\`);
-        const consoleMessages = document.getElementById('console-messages');
-        if (consoleMessages) {
-            const messageElement = document.createElement('div');
-            messageElement.textContent = \`\${new Date().toLocaleTimeString()}: \${message}\`;
-            consoleMessages.appendChild(messageElement);
-            consoleMessages.scrollTop = consoleMessages.scrollHeight;
-            
-            // Ограничиваем количество сообщений
-            if (consoleMessages.children.length > 10) {
-                consoleMessages.removeChild(consoleMessages.firstChild);
-            }
-        }
-    }
-    
-    setupEventListeners() {
-        // Глобальные горячие клавиши
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
-                    case '1':
-                        e.preventDefault();
-                        this.backToMain();
-                        break;
-                    case '2':
-                        e.preventDefault();
-                        this.selectReport('operational');
-                        break;
-                }
-            }
-        });
-        
-        this.log('Обработчики событий установлены');
+// Состояние приложения
+let reports = JSON.parse(localStorage.getItem('warehouseReports')) || {};
+let personnelReports = JSON.parse(localStorage.getItem('personnelReports')) || {};
+let currentDate = new Date();
+let warehouseCalendarView = 'week';
+let summaryCalendarView = 'month';
+let personnelCalendarView = 'week';
+let personnelSummaryCalendarView = 'month';
+let selectedWarehouseDate = null;
+let selectedSummaryDate = null;
+let selectedPersonnelDate = null;
+let currentWarehouse = '';
+let currentPersonnelObj = '';
+let summaryCurrentDate = new Date();
+let personnelSummaryCurrentDate = new Date();
+
+// Функции чистки
+function cleanOldPersonnelReports() {
+    cleanOldReports(personnelReports);
+    localStorage.setItem('personnelReports', JSON.stringify(personnelReports));
+}
+
+// Генерация списков
+function generateWarehouseList() {
+    const list = document.getElementById('warehouseList');
+    if (!list) return;
+    list.innerHTML = '';
+    WAREHOUSES.forEach(wh => {
+        const btn = document.createElement('button');
+        btn.className = 'warehouse-btn';
+        btn.textContent = wh;
+        btn.onclick = () => showWarehouseReport(wh);
+        list.appendChild(btn);
+    });
+}
+
+function generatePersonnelList() {
+    const list = document.getElementById('personnelList');
+    if (!list) return;
+    list.innerHTML = '';
+    WAREHOUSES.forEach(obj => {
+        const btn = document.createElement('button');
+        btn.className = 'warehouse-btn';
+        btn.textContent = obj;
+        btn.onclick = () => showPersonnelReport(obj);
+        list.appendChild(btn);
+    });
+}
+
+// Выбор отчёта
+function selectReport(reportType) {
+    document.getElementById('mainSection')?.classList.remove('active');
+    currentDate = new Date();
+
+    switch (reportType) {
+        case 'operational':
+            document.getElementById('warehouseReportSection')?.classList.add('active');
+            generateWarehouseList();
+            document.querySelector('#warehouseReportSection .date-section')?.classList.add('hidden');
+            document.querySelector('#warehouseReportSection .radio-group')?.classList.add('hidden');
+            document.querySelector('#warehouseReportSection #reportForm')?.classList.add('hidden');
+            break;
+        case 'personnel':
+            document.getElementById('personnelReportSection')?.classList.add('active');
+            generatePersonnelList();
+            document.querySelector('#personnelReportSection .date-section')?.classList.add('hidden');
+            document.querySelector('#personnelReportSection .radio-group')?.classList.add('hidden');
+            document.querySelector('#personnelReportSection #personnelReportForm')?.classList.add('hidden');
+            break;
     }
 }
 
-// Автоматически создаем и инициализируем приложение при загрузке
-console.log('🔄 Создание экземпляра V3LS3N App...');
-window.app = new SimpleV3LS3NApp();
+// Показ отчёта по складу
+function showWarehouseReport(wh) {
+    currentWarehouse = wh;
+    const title = document.getElementById('warehouseTitle');
+    if (title) title.textContent = `📍 ${wh}`;
+    
+    document.querySelector('#warehouseReportSection .date-section')?.classList.remove('hidden');
+    document.querySelector('#warehouseReportSection .radio-group')?.classList.remove('hidden');
+    document.querySelector('#warehouseReportSection #reportForm')?.classList.remove('hidden');
+    
+    selectedWarehouseDate = currentDate.toLocaleDateString('ru-RU');
+    const dateDisplay = document.getElementById('selectedWarehouseDate');
+    if (dateDisplay) dateDisplay.innerHTML = `<strong>Выбрано:</strong> ${selectedWarehouseDate}`;
+    
+    renderWarehouseCalendar();
+    loadCategoryInputs(reports, currentWarehouse, selectedWarehouseDate, currentDate, warehouseCalendarView);
+}
 
-// Экспортируем для глобального доступа
-window.SimpleV3LS3NApp = SimpleV3LS3NApp;
+// Показ отчёта по персоналу
+function showPersonnelReport(obj) {
+    currentPersonnelObj = obj;
+    const title = document.getElementById('personnelTitle');
+    if (title) title.textContent = `📍 ${obj}`;
+    
+    document.querySelector('#personnelReportSection .date-section')?.classList.remove('hidden');
+    document.querySelector('#personnelReportSection .radio-group')?.classList.remove('hidden');
+    document.querySelector('#personnelReportSection #personnelReportForm')?.classList.remove('hidden');
+    
+    selectedPersonnelDate = currentDate.toLocaleDateString('ru-RU');
+    const dateDisplay = document.getElementById('selectedPersonnelDate');
+    if (dateDisplay) dateDisplay.innerHTML = `<strong>Выбрано:</strong> ${selectedPersonnelDate}`;
+    
+    renderPersonnelCalendar();
+    loadPersonnelCategoryInputs(personnelReports, currentPersonnelObj, selectedPersonnelDate);
+}
 
-console.log('✅ V3LS3N App полностью загружен и инициализирован');
+// Календарь склада
+function renderWarehouseCalendar() {
+    renderCalendar('warehouseCalendar', warehouseCalendarView, (date) => {
+        currentDate = date;
+        selectedWarehouseDate = currentDate.toLocaleDateString('ru-RU');
+        const dateDisplay = document.getElementById('selectedWarehouseDate');
+        if (dateDisplay) dateDisplay.innerHTML = `<strong>Выбрано:</strong> ${selectedWarehouseDate}`;
+        renderWarehouseCalendar();
+        loadCategoryInputs(reports, currentWarehouse, selectedWarehouseDate, currentDate, warehouseCalendarView);
+    }, currentDate);
+    
+    const toggleText = document.getElementById('warehouseViewToggleText');
+    if (toggleText) toggleText.textContent = warehouseCalendarView === 'week' ? '📅 Неделя' : '📆 Месяц';
+}
+
+// Календарь персонала
+function renderPersonnelCalendar() {
+    renderCalendar('personnelCalendar', personnelCalendarView, (date) => {
+        currentDate = date;
+        selectedPersonnelDate = currentDate.toLocaleDateString('ru-RU');
+        const dateDisplay = document.getElementById('selectedPersonnelDate');
+        if (dateDisplay) dateDisplay.innerHTML = `<strong>Выбрано:</strong> ${selectedPersonnelDate}`;
+        renderPersonnelCalendar();
+        loadPersonnelCategoryInputs(personnelReports, currentPersonnelObj, selectedPersonnelDate);
+    }, currentDate);
+    
+    const toggleText = document.getElementById('personnelViewToggleText');
+    if (toggleText) toggleText.textContent = personnelCalendarView === 'week' ? '📅 Неделя' : '📆 Месяц';
+}
+
+// Навигация по календарю
+function prevPeriod() {
+    warehouseCalendarView === 'week' ? currentDate.setDate(currentDate.getDate() - 7) : currentDate.setMonth(currentDate.getMonth() - 1);
+    renderWarehouseCalendar();
+}
+
+function nextPeriod() {
+    warehouseCalendarView === 'week' ? currentDate.setDate(currentDate.getDate() + 7) : currentDate.setMonth(currentDate.getMonth() + 1);
+    renderWarehouseCalendar();
+}
+
+function toggleCalendarView() {
+    warehouseCalendarView = warehouseCalendarView === 'week' ? 'month' : 'week';
+    renderWarehouseCalendar();
+}
+
+function prevPeriodPersonnel() {
+    personnelCalendarView === 'week' ? currentDate.setDate(currentDate.getDate() - 7) : currentDate.setMonth(currentDate.getMonth() - 1);
+    renderPersonnelCalendar();
+}
+
+function nextPeriodPersonnel() {
+    personnelCalendarView === 'week' ? currentDate.setDate(currentDate.getDate() + 7) : currentDate.setMonth(currentDate.getMonth() + 1);
+    renderPersonnelCalendar();
+}
+
+function toggleCalendarViewPersonnel() {
+    personnelCalendarView = personnelCalendarView === 'week' ? 'month' : 'week';
+    renderPersonnelCalendar();
+}
+
+// Сохранение операционного отчёта
+function saveWarehouseReport() {
+    if (!selectedWarehouseDate) return alert('⚠️ Выберите дату!');
+    if (!currentWarehouse) return alert('⚠️ Выберите склад!');
+    
+    const type = document.querySelector('input[name="warehouseReportType"]:checked')?.value;
+    if (!type) return;
+
+    if (!reports[selectedWarehouseDate]) reports[selectedWarehouseDate] = {};
+    if (!reports[selectedWarehouseDate][currentWarehouse]) reports[selectedWarehouseDate][currentWarehouse] = {};
+    if (!reports[selectedWarehouseDate][currentWarehouse][type]) reports[selectedWarehouseDate][currentWarehouse][type] = {};
+
+    CATEGORIES.forEach(cat => {
+        let data = {};
+        if (cat.type === 'number' || cat.type === 'time') {
+            const planEl = document.getElementById(`${currentWarehouse}_${type}_${cat.name}_plan`);
+            const factEl = document.getElementById(`${currentWarehouse}_${type}_${cat.name}_fact`);
+            if (planEl && factEl) {
+                const plan = planEl.value.trim();
+                const fact = factEl.value.trim();
+                let delta = '';
+                if (cat.type === 'number') {
+                    const p = parseInt(plan) || 0;
+                    const f = parseInt(fact) || 0;
+                    delta = f - p;
+                } else if (cat.type === 'time') {
+                    delta = plan && fact ? (parseTimeToMin(plan) && parseTimeToMin(fact) ? (parseTimeToMin(fact) <= parseTimeToMin(plan) ? 'Норма' : 'Отклонение') : 'Неверный формат (ЧЧ:ММ)') : '';
+                }
+                data = { plan, fact, delta };
+            }
+        } else if (cat.type === 'single') {
+            const valueEl = document.getElementById(`${currentWarehouse}_${type}_${cat.name}_value`);
+            if (valueEl) data = { value: valueEl.value.trim() };
+        } else if (cat.type === 'triple' || cat.type === 'double') {
+            data = {};
+            cat.fields.forEach(f => {
+                const el = document.getElementById(`${currentWarehouse}_${type}_${cat.name}_${f.n}`);
+                if (el) data[f.n] = el.value.trim();
+            });
+        } else if (cat.type === 'yesno') {
+            const valueEl = document.getElementById(`${currentWarehouse}_${type}_${cat.name}_value`);
+            if (valueEl) data = { value: valueEl.value.trim() };
+        } else if (cat.type === 'select') {
+            const valueEl = document.getElementById(`${currentWarehouse}_${type}_${cat.name}_value`);
+            if (valueEl) data = { value: valueEl.value.trim() };
+        }
+        reports[selectedWarehouseDate][currentWarehouse][type][cat.name] = data;
+    });
+
+    localStorage.setItem('warehouseReports', JSON.stringify(reports));
+    cleanOldReports(reports);
+    localStorage.setItem('warehouseReports', JSON.stringify(reports));
+
+    syncToSupabase('operational', selectedWarehouseDate, currentWarehouse, type, reports[selectedWarehouseDate][currentWarehouse][type]);
+
+    alert('✅ Сохранено! Данные доступны в общем своде.');
+    backToMain();
+}
+
+// Сохранение отчёта по персоналу
+function savePersonnelReport() {
+    if (!selectedPersonnelDate) return alert('⚠️ Выберите дату!');
+    if (!currentPersonnelObj) return alert('⚠️ Выберите объект!');
+    
+    const type = document.querySelector('input[name="personnelReportType"]:checked')?.value;
+    if (!type) return;
+
+    if (!personnelReports[selectedPersonnelDate]) personnelReports[selectedPersonnelDate] = {};
+    if (!personnelReports[selectedPersonnelDate][currentPersonnelObj]) personnelReports[selectedPersonnelDate][currentPersonnelObj] = {};
+    if (!personnelReports[selectedPersonnelDate][currentPersonnelObj][type]) personnelReports[selectedPersonnelDate][currentPersonnelObj][type] = {};
+
+    PERSONNEL_CATEGORIES.forEach(cat => {
+        let data = {};
+        if (cat.type === 'number') {
+            const planEl = document.getElementById(`${currentPersonnelObj}_${type}_${cat.name}_plan`);
+            const factEl = document.getElementById(`${currentPersonnelObj}_${type}_${cat.name}_fact`);
+            if (planEl && factEl) {
+                data.plan = planEl.value.trim();
+                data.fact = factEl.value.trim();
+                data.delta = (parseInt(factEl.value) || 0) - (parseInt(planEl.value) || 0);
+            }
+        } else if (cat.type === 'quadruple' || cat.type === 'triple') {
+            data = {};
+            cat.fields.forEach(f => {
+                const el = document.getElementById(`${currentPersonnelObj}_${type}_${cat.name}_${f.n}`);
+                if (el) data[f.n] = el.value.trim();
+            });
+        } else if (cat.type === 'single' || cat.type === 'text') {
+            const valueEl = document.getElementById(`${currentPersonnelObj}_${type}_${cat.name}_value`);
+            if (valueEl) data.value = valueEl.value.trim();
+        } else if (cat.type === 'select') {
+            const valueEl = document.getElementById(`${currentPersonnelObj}_${type}_${cat.name}_value`);
+            if (valueEl) data.value = valueEl.value.trim();
+        }
+        personnelReports[selectedPersonnelDate][currentPersonnelObj][type][cat.name] = data;
+    });
+
+    localStorage.setItem('personnelReports', JSON.stringify(personnelReports));
+    cleanOldPersonnelReports();
+
+    syncToSupabase('personnel', selectedPersonnelDate, currentPersonnelObj, type, personnelReports[selectedPersonnelDate][currentPersonnelObj][type]);
+
+    alert('✅ Данные сохранены!');
+    backToMain();
+}
+
+// Сводные таблицы
+function updateSummaryTable() {
+    if (selectedSummaryDate) showSummaryData();
+}
+
+function showSummaryData() {
+    if (!selectedSummaryDate) return alert('⚠️ Кликните на дату в календаре!');
+    
+    const includeDay = document.getElementById('summaryDay')?.checked;
+    const includeNight = document.getElementById('summaryNight')?.checked;
+    if (!includeDay && !includeNight) return alert('⚠️ Выберите хотя бы один тип отчёта!');
+    
+    const selectedManager = document.getElementById('managerFilter')?.value || '';
+    const dateDisplay = document.getElementById('currentSummaryDate');
+    if (dateDisplay) dateDisplay.textContent = selectedSummaryDate;
+
+    document.getElementById('summarySection')?.classList.remove('active');
+    document.getElementById('summaryTableSection')?.classList.add('active');
+
+    const tableDiv = document.getElementById('summaryTable');
+    if (tableDiv) {
+        tableDiv.innerHTML = generateSummaryTable(reports, selectedSummaryDate, includeDay, includeNight, selectedManager);
+    }
+}
+
+function updatePersonnelSummaryTable() {
+    if (selectedSummaryDate) showPersonnelSummaryData();
+}
+
+function showPersonnelSummaryData() {
+    if (!selectedSummaryDate) return alert('⚠️ Кликните на дату в календаре!');
+    
+    const includeDay = document.getElementById('personnelSummaryDay')?.checked;
+    const includeNight = document.getElementById('personnelSummaryNight')?.checked;
+    if (!includeDay && !includeNight) return alert('⚠️ Выберите хотя бы один тип отчёта!');
+    
+    const selectedManager = document.getElementById('personnelManagerFilter')?.value || '';
+    const dateDisplay = document.getElementById('currentPersonnelSummaryDate');
+    if (dateDisplay) dateDisplay.textContent = selectedSummaryDate;
+
+    document.getElementById('personnelSummarySection')?.classList.remove('active');
+    document.getElementById('personnelSummaryTableSection')?.classList.add('active');
+
+    const tableDiv = document.getElementById('personnelSummaryTable');
+    if (tableDiv) {
+        tableDiv.innerHTML = generatePersonnelSummaryTable(personnelReports, selectedSummaryDate, includeDay, includeNight, selectedManager);
+    }
+}
+
+// Навигация по сводным календарям
+function showSummarySection() {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('summarySection')?.classList.add('active');
+    renderSummaryCalendar();
+}
+
+function showPersonnelSummarySection() {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('personnelSummarySection')?.classList.add('active');
+    renderPersonnelSummaryCalendar();
+}
+
+function prevPeriodSummary() {
+    summaryCalendarView === 'week' ? summaryCurrentDate.setDate(summaryCurrentDate.getDate() - 7) : summaryCurrentDate.setMonth(summaryCurrentDate.getMonth() - 1);
+    renderSummaryCalendar();
+}
+
+function nextPeriodSummary() {
+    summaryCalendarView === 'week' ? summaryCurrentDate.setDate(summaryCurrentDate.getDate() + 7) : summaryCurrentDate.setMonth(summaryCurrentDate.getMonth() + 1);
+    renderSummaryCalendar();
+}
+
+function toggleCalendarViewSummary() {
+    summaryCalendarView = summaryCalendarView === 'week' ? 'month' : 'week';
+    const toggleText = document.getElementById('summaryViewToggleText');
+    if (toggleText) toggleText.textContent = summaryCalendarView === 'week' ? '📅 Неделя' : '📆 Месяц';
+    renderSummaryCalendar();
+}
+
+function renderSummaryCalendar() {
+    renderCalendar('summaryCalendar', summaryCalendarView, (date) => {
+        selectedSummaryDate = date.toLocaleDateString('ru-RU');
+    }, summaryCurrentDate);
+}
+
+function prevPeriodPersonnelSummary() {
+    personnelSummaryCalendarView === 'week' ? personnelSummaryCurrentDate.setDate(personnelSummaryCurrentDate.getDate() - 7) : personnelSummaryCurrentDate.setMonth(personnelSummaryCurrentDate.getMonth() - 1);
+    renderPersonnelSummaryCalendar();
+}
+
+function nextPeriodPersonnelSummary() {
+    personnelSummaryCalendarView === 'week' ? personnelSummaryCurrentDate.setDate(personnelSummaryCurrentDate.getDate() + 7) : personnelSummaryCurrentDate.setMonth(personnelSummaryCurrentDate.getMonth() + 1);
+    renderPersonnelSummaryCalendar();
+}
+
+function toggleCalendarViewPersonnelSummary() {
+    personnelSummaryCalendarView = personnelSummaryCalendarView === 'week' ? 'month' : 'week';
+    const toggleText = document.getElementById('personnelSummaryViewToggleText');
+    if (toggleText) toggleText.textContent = personnelSummaryCalendarView === 'week' ? '📅 Неделя' : '📆 Месяц';
+    renderPersonnelSummaryCalendar();
+}
+
+function renderPersonnelSummaryCalendar() {
+    renderCalendar('personnelSummaryCalendar', personnelSummaryCalendarView, (date) => {
+        selectedSummaryDate = date.toLocaleDateString('ru-RU');
+    }, personnelSummaryCurrentDate);
+}
+
+// Навигация по дням
+function prevSummaryDay() {
+    if (!selectedSummaryDate) return;
+    const [day, month, year] = selectedSummaryDate.split('.').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() - 1);
+    selectedSummaryDate = date.toLocaleDateString('ru-RU');
+    const dateDisplay = document.getElementById('currentSummaryDate');
+    if (dateDisplay) dateDisplay.textContent = selectedSummaryDate;
+    showSummaryData();
+}
+
+function nextSummaryDay() {
+    if (!selectedSummaryDate) return;
+    const [day, month, year] = selectedSummaryDate.split('.').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() + 1);
+    selectedSummaryDate = date.toLocaleDateString('ru-RU');
+    const dateDisplay = document.getElementById('currentSummaryDate');
+    if (dateDisplay) dateDisplay.textContent = selectedSummaryDate;
+    showSummaryData();
+}
+
+function prevPersonnelSummaryDay() {
+    if (!selectedSummaryDate) return;
+    const [day, month, year] = selectedSummaryDate.split('.').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() - 1);
+    selectedSummaryDate = date.toLocaleDateString('ru-RU');
+    const dateDisplay = document.getElementById('currentPersonnelSummaryDate');
+    if (dateDisplay) dateDisplay.textContent = selectedSummaryDate;
+    showPersonnelSummaryData();
+}
+
+function nextPersonnelSummaryDay() {
+    if (!selectedSummaryDate) return;
+    const [day, month, year] = selectedSummaryDate.split('.').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() + 1);
+    selectedSummaryDate = date.toLocaleDateString('ru-RU');
+    const dateDisplay = document.getElementById('currentPersonnelSummaryDate');
+    if (dateDisplay) dateDisplay.textContent = selectedSummaryDate;
+    showPersonnelSummaryData();
+}
+
+// Полнэкранная таблица
+function toggleFullScreen() {
+    const fs = document.getElementById('fullScreenTable');
+    const tbl = document.getElementById('summaryTable')?.innerHTML;
+    if (!fs || !tbl) return;
+    
+    if (fs.style.display === 'none') {
+        document.getElementById('fullSummaryTable').innerHTML = tbl;
+        fs.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    } else {
+        fs.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function togglePersonnelFullScreen() {
+    const fs = document.getElementById('fullPersonnelScreenTable');
+    const tbl = document.getElementById('personnelSummaryTable')?.innerHTML;
+    if (!fs || !tbl) return;
+    
+    if (fs.style.display === 'none') {
+        document.getElementById('fullPersonnelSummaryTable').innerHTML = tbl;
+        fs.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    } else {
+        fs.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Возврат в главное меню
+function backToMain() {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('mainSection')?.classList.add('active');
+    currentWarehouse = '';
+    currentPersonnelObj = '';
+    selectedWarehouseDate = null;
+    selectedPersonnelDate = null;
+    selectedSummaryDate = null;
+}
+
+// Экспорт функций в window для inline handlers
+window.selectReport = selectReport;
+window.backToMain = backToMain;
+window.prevPeriod = prevPeriod;
+window.nextPeriod = nextPeriod;
+window.toggleCalendarView = toggleCalendarView;
+window.prevPeriodPersonnel = prevPeriodPersonnel;
+window.nextPeriodPersonnel = nextPeriodPersonnel;
+window.toggleCalendarViewPersonnel = toggleCalendarViewPersonnel;
+window.saveWarehouseReport = saveWarehouseReport;
+window.savePersonnelReport = savePersonnelReport;
+// selectYesNo уже экспортирован из forms.js и будет доступен через импорт
+window.selectYesNo = selectYesNo;
+window.updateSummaryTable = updateSummaryTable;
+window.showSummaryData = showSummaryData;
+window.showSummarySection = showSummarySection;
+window.prevPeriodSummary = prevPeriodSummary;
+window.nextPeriodSummary = nextPeriodSummary;
+window.toggleCalendarViewSummary = toggleCalendarViewSummary;
+window.prevSummaryDay = prevSummaryDay;
+window.nextSummaryDay = nextSummaryDay;
+window.toggleFullScreen = toggleFullScreen;
+window.updatePersonnelSummaryTable = updatePersonnelSummaryTable;
+window.showPersonnelSummaryData = showPersonnelSummaryData;
+window.showPersonnelSummarySection = showPersonnelSummarySection;
+window.prevPeriodPersonnelSummary = prevPeriodPersonnelSummary;
+window.nextPeriodPersonnelSummary = nextPeriodPersonnelSummary;
+window.toggleCalendarViewPersonnelSummary = toggleCalendarViewPersonnelSummary;
+window.prevPersonnelSummaryDay = prevPersonnelSummaryDay;
+window.nextPersonnelSummaryDay = nextPersonnelSummaryDay;
+window.togglePersonnelFullScreen = togglePersonnelFullScreen;
+
+// Инициализация
+window.addEventListener('DOMContentLoaded', async () => {
+    // Инициализируем Supabase после загрузки CDN скрипта
+    initSupabase();
+    document.querySelectorAll('input[name="warehouseReportType"]').forEach(r => 
+        r.addEventListener('change', () => loadCategoryInputs(reports, currentWarehouse, selectedWarehouseDate, currentDate, warehouseCalendarView))
+    );
+    
+    document.querySelectorAll('input[name="personnelReportType"]').forEach(r => 
+        r.addEventListener('change', () => loadPersonnelCategoryInputs(personnelReports, currentPersonnelObj, selectedPersonnelDate))
+    );
+
+    await loadFromSupabase(reports, personnelReports);
+    cleanOldReports(reports);
+    localStorage.setItem('warehouseReports', JSON.stringify(reports));
+    cleanOldPersonnelReports();
+    
+    generateWarehouseList();
+    generatePersonnelList();
+    renderWarehouseCalendar();
+    renderPersonnelCalendar();
+    renderSummaryCalendar();
+    renderPersonnelSummaryCalendar();
+    
+    setupRealtimeSubscriptions(() => loadFromSupabase(reports, personnelReports));
+});
