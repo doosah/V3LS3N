@@ -1,24 +1,37 @@
 /* Стили для логотипов */
 
-/* Логотип в левом верхнем углу (всегда видимый) */
-.logo-fixed {
-    position: fixed;
-    top: 20px;
-    left: 20px;
+/* Логотип в header (всегда видимый, мигающий) */
+.logo-fixed-header {
     height: auto;
-    max-height: 60px;
+    max-height: 50px;
     width: auto;
-    max-width: 200px;
+    max-width: 150px;
     z-index: 1001;
     filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.1))
             drop-shadow(0 4px 12px rgba(30, 58, 95, 0.3));
+    animation: logoBlink 2s ease-in-out infinite;
     transition: transform 0.3s ease, filter 0.3s ease;
 }
 
-.logo-fixed:hover {
+.logo-fixed-header:hover {
     transform: scale(1.05);
     filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.2))
             drop-shadow(0 6px 16px rgba(30, 58, 95, 0.4));
+}
+
+/* Анимация мигания логотипа */
+@keyframes logoBlink {
+    0%, 100% {
+        opacity: 0.6;
+        filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.1))
+                drop-shadow(0 4px 12px rgba(30, 58, 95, 0.3));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3))
+                drop-shadow(0 8px 20px rgba(30, 58, 95, 0.6))
+                drop-shadow(0 0 15px rgba(30, 58, 95, 0.4));
+    }
 }
 
 /* Логотип на главной странице (под кнопками, на весь лист) */
@@ -59,6 +72,7 @@
     width: 100%;
     margin-bottom: 20px;
     padding: 20px;
+    min-height: 200px;
 }
 
 .section-logo {
@@ -78,6 +92,27 @@
     transform: scale(1.05);
     filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.2))
             drop-shadow(0 6px 16px rgba(30, 58, 95, 0.4));
+}
+
+/* Крупный логотип в секциях сводов */
+.section-logo-large {
+    max-width: 85%;
+    max-height: 250px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 12px rgba(255, 255, 255, 0.15))
+            drop-shadow(0 6px 20px rgba(30, 58, 95, 0.4));
+    opacity: 0.9;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    margin: 0 auto;
+}
+
+.section-logo-large:hover {
+    opacity: 1;
+    transform: scale(1.02);
+    filter: drop-shadow(0 4px 16px rgba(255, 255, 255, 0.2))
+            drop-shadow(0 8px 24px rgba(30, 58, 95, 0.5));
 }
 
 /* Адаптивность для логотипов */
@@ -100,11 +135,13 @@
 }
 
 @media (max-width: 480px) {
-    .logo-fixed {
+    .logo-fixed-header {
         max-height: 35px;
-        max-width: 120px;
-        top: 10px;
-        left: 10px;
+        max-width: 100px;
+    }
+    
+    .section-logo-large {
+        max-height: 120px;
     }
     
     .main-page-logo {

@@ -27,9 +27,10 @@
 .header-inner {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 12px;
     position: relative;
+    width: 100%;
 }
 
 /* Убираем логотип из header-inner, он теперь fixed */

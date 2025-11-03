@@ -86,10 +86,11 @@ button.date-btn.selected {
 }
 
 .negative {
-    color: #fa709a;
-    font-weight: bold;
-    text-shadow: 0 0 8px rgba(250, 112, 154, 0.6),
-                 0 0 12px rgba(250, 112, 154, 0.4);
+    color: #ee0000;
+    font-weight: 900;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8),
+                 0 0 15px rgba(238, 0, 0, 0.6),
+                 0 0 20px rgba(250, 112, 154, 0.4);
 }
 
 .good {
@@ -98,10 +99,11 @@ button.date-btn.selected {
 }
 
 .bad {
-    color: #fa709a;
-    font-weight: bold;
-    text-shadow: 0 0 8px rgba(250, 112, 154, 0.6),
-                 0 0 12px rgba(250, 112, 154, 0.4);
+    color: #ee0000;
+    font-weight: 900;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8),
+                 0 0 15px rgba(238, 0, 0, 0.6),
+                 0 0 20px rgba(250, 112, 154, 0.4);
 }
 
 @media (prefers-reduced-motion: reduce) {

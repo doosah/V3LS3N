@@ -31,6 +31,11 @@ h2 {
     text-align: right;
     width: 100%;
     margin-left: auto;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
 }
 
 .warehouse-btn {

@@ -19,11 +19,9 @@
 </head>
 <body>
     <div class="container">
-        <!-- Фиксированный логотип всегда в левом верхнем углу -->
-        <img src="img/logo.png" alt="V3LS3N Logo" class="logo-fixed">
-        
         <div class="header">
             <div class="header-inner">
+                <img src="img/logo.png" alt="V3LS3N Logo" class="logo-fixed-header">
                 <div class="header-text">
                     <div class="subtitle subtitle-right">Сервис учета и аналитики доставки хабов</div>
                 </div>
@@ -105,7 +103,7 @@
 
         <div id="summarySection" class="section">
             <div class="section-logo-top">
-                <img src="img/logo2.png" alt="Section Logo" class="section-logo">
+                <img src="img/logo2.png" alt="Section Logo" class="section-logo-large">
             </div>
             <h2>📊 Общий свод по всем складам</h2>
             <div class="checkbox-group">
@@ -119,17 +117,6 @@
                     <option value="Территория 1 Шутин Д.М.">Территория 1 Шутин Д.М.</option>
                     <option value="Территория 2 Любавкская М.И.">Территория 2 Любавкская М.И.</option>
                 </select>
-            </div>
-            <div class="date-section">
-                <h3>📅 Выберите дату для анализа</h3>
-                <div class="calendar-controls">
-                    <button class="secondary" onclick="prevPeriodSummary()">← Предыдущий</button>
-                    <button class="secondary" onclick="toggleCalendarViewSummary()">
-                        <span id="summaryViewToggleText">📆 Месяц</span>
-                    </button>
-                    <button class="secondary" onclick="nextPeriodSummary()">Следующий →</button>
-                </div>
-                <div id="summaryCalendar" class="calendar"></div>
             </div>
             <div class="action-buttons">
                 <button onclick="showSummaryData()">📈 Показать сводные данные</button>
@@ -155,7 +142,7 @@
 
         <div id="personnelSummarySection" class="section">
             <div class="section-logo-top">
-                <img src="img/logo3.png" alt="Personnel Logo" class="section-logo">
+                <img src="img/logo2.png" alt="Personnel Logo" class="section-logo-large">
             </div>
             <h2>📊 Общий свод по персоналу</h2>
             <div class="checkbox-group">
@@ -169,17 +156,6 @@
                     <option value="Территория 1 Шутин Д.М.">Территория 1 Шутин Д.М.</option>
                     <option value="Территория 2 Любавкская М.И.">Территория 2 Любавкская М.И.</option>
                 </select>
-            </div>
-            <div class="date-section">
-                <h3>📅 Выберите дату для анализа</h3>
-                <div class="calendar-controls">
-                    <button class="secondary" onclick="prevPeriodPersonnelSummary()">← Предыдущий</button>
-                    <button class="secondary" onclick="toggleCalendarViewPersonnelSummary()">
-                        <span id="personnelSummaryViewToggleText">📆 Месяц</span>
-                    </button>
-                    <button class="secondary" onclick="nextPeriodPersonnelSummary()">Следующий →</button>
-                </div>
-                <div id="personnelSummaryCalendar" class="calendar"></div>
             </div>
             <div class="action-buttons">
                 <button onclick="showPersonnelSummaryData()">📈 Показать сводные данные</button>
