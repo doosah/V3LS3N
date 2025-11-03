@@ -1,16 +1,24 @@
 /* CSS Variables */
+/* Будет обновлено после добавления логотипов с их цветами */
 :root {
-    --primary-color: #667eea;
-    --primary-dark: #764ba2;
-    --secondary-color: #f093fb;
-    --accent-color: #4facfe;
+    /* Фирменные цвета (обновить в brand.css) */
+    --primary-color: var(--brand-primary, #667eea);
+    --primary-dark: var(--brand-secondary, #764ba2);
+    --secondary-color: var(--brand-accent, #f093fb);
+    --accent-color: var(--brand-accent, #4facfe);
+    
+    /* Функциональные цвета */
     --success-color: #43e97b;
     --error-color: #fa709a;
-    --bg-dark: #0a0e27;
-    --bg-darker: #1a1f3a;
-    --bg-container: rgba(10, 14, 39, 0.85);
-    --text-primary: #f0f4ff;
-    --text-secondary: #c8d2e8;
+    
+    /* Фон на основе фирменных цветов */
+    --bg-dark: var(--brand-dark-1, #000000);
+    --bg-darker: var(--brand-dark-2, #0f0f0f);
+    --bg-container: rgba(0, 0, 0, 0.85);
+    
+    /* Текст на основе фирменных цветов */
+    --text-primary: var(--brand-light-1, #f0f4ff);
+    --text-secondary: var(--brand-light-2, #c8d2e8);
     --border-color: rgba(135, 150, 200, 0.15);
     --touch-target: 44px;
 }

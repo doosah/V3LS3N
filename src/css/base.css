@@ -11,7 +11,7 @@ body {
     padding: 10px;
     -webkit-font-smoothing: antialiased;
     touch-action: manipulation;
-    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b3d 100%);
+    background: linear-gradient(135deg, var(--brand-dark-1, #000000) 0%, var(--brand-dark-3, #1a1a1a) 50%, var(--brand-accent, #1e3a5f) 100%);
     background-size: 400% 400%;
     animation: gradientShift 15s ease infinite;
     color: var(--text-primary);
@@ -24,11 +24,11 @@ body {
 }
 
 .container {
-    background: rgba(10, 14, 39, 0.75);
+    background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(135, 150, 200, 0.2);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6),
-                0 0 0 1px rgba(102, 126, 234, 0.1),
+    border: 1px solid var(--brand-primary, #2d2d2d);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                0 0 0 1px rgba(30, 58, 95, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
