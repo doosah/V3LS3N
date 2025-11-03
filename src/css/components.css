@@ -27,6 +27,12 @@ h2 {
     color: rgba(255, 255, 255, 0.85);
 }
 
+.subtitle-right {
+    text-align: right;
+    width: 100%;
+    margin-left: auto;
+}
+
 .warehouse-btn {
     background: linear-gradient(135deg, rgba(45, 45, 45, 0.4) 0%, rgba(30, 58, 95, 0.3) 100%);
     border: 1px solid var(--brand-primary, #2d2d2d);
