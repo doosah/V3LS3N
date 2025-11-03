@@ -14,17 +14,16 @@
     <link rel="stylesheet" href="src/css/components.css">
     <link rel="stylesheet" href="src/css/theme.css">
     <link rel="stylesheet" href="src/css/tables.css">
+    <link rel="stylesheet" href="src/css/logos.css">
     <link rel="stylesheet" href="src/css/responsive.css">
 </head>
 <body>
     <div class="container">
+        <!-- Фиксированный логотип всегда в левом верхнем углу -->
+        <img src="img/logo.png" alt="V3LS3N Logo" class="logo-fixed">
+        
         <div class="header">
             <div class="header-inner">
-                <div class="brand-logos">
-                    <img src="img/logo-1.png" alt="Логотип 1" class="brand-logo main">
-                    <img src="img/logo-2.png" alt="Логотип 2" class="brand-logo secondary">
-                    <img src="img/logo-3.png" alt="Логотип 3" class="brand-logo accent">
-                </div>
                 <div class="header-text">
                     <h1>📊 Сводные данные</h1>
                     <div class="subtitle">Система учёта и аналитики складских операций</div>
@@ -36,6 +35,9 @@
             <h2>Выберите отчёт</h2>
             <button class="large-button" onclick="selectReport('operational')">📄 Операционные показатели</button>
             <button class="large-button" onclick="selectReport('personnel')">📊 Персонал</button>
+            <div class="main-logo-wrapper">
+                <img src="img/logo1.png" alt="Main Logo" class="main-page-logo">
+            </div>
         </div>
 
         <div id="warehouseReportSection" class="section">
@@ -103,6 +105,9 @@
         </div>
 
         <div id="summarySection" class="section">
+            <div class="section-logo-top">
+                <img src="img/logo2.png" alt="Section Logo" class="section-logo">
+            </div>
             <h2>📊 Общий свод по всем складам</h2>
             <div class="checkbox-group">
                 <label><input type="checkbox" id="summaryDay" checked> ☀️ Дневные смены</label>
@@ -150,6 +155,9 @@
         </div>
 
         <div id="personnelSummarySection" class="section">
+            <div class="section-logo-top">
+                <img src="img/logo3.png" alt="Personnel Logo" class="section-logo">
+            </div>
             <h2>📊 Общий свод по персоналу</h2>
             <div class="checkbox-group">
                 <label><input type="checkbox" id="personnelSummaryDay" checked> ☀️ Дневные смены</label>

@@ -87,8 +87,9 @@ button.date-btn.selected {
 
 .negative {
     color: #fa709a;
-    font-weight: 600;
-    text-shadow: 0 0 8px rgba(250, 112, 154, 0.4);
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(250, 112, 154, 0.6),
+                 0 0 12px rgba(250, 112, 154, 0.4);
 }
 
 .good {
@@ -98,7 +99,9 @@ button.date-btn.selected {
 
 .bad {
     color: #fa709a;
-    text-shadow: 0 0 5px rgba(250, 112, 154, 0.3);
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(250, 112, 154, 0.6),
+                 0 0 12px rgba(250, 112, 154, 0.4);
 }
 
 @media (prefers-reduced-motion: reduce) {

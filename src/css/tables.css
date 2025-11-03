@@ -64,3 +64,14 @@ th:nth-child(n+3), td:nth-child(n+3) {
     font-size: clamp(7px, 1.8vw, 9px);
 }
 
+/* Красные цифры в таблицах должны быть жирными */
+td.negative,
+td.bad {
+    font-weight: bold;
+}
+
+/* Зелёные цифры могут быть обычными */
+td.positive,
+td.good {
+    font-weight: normal;
+}

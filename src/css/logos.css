@@ -1,0 +1,124 @@
+/* Стили для логотипов */
+
+/* Логотип в левом верхнем углу (всегда видимый) */
+.logo-fixed {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    height: auto;
+    max-height: 60px;
+    width: auto;
+    max-width: 200px;
+    z-index: 1001;
+    filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.1))
+            drop-shadow(0 4px 12px rgba(30, 58, 95, 0.3));
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.logo-fixed:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.2))
+            drop-shadow(0 6px 16px rgba(30, 58, 95, 0.4));
+}
+
+/* Логотип на главной странице (под кнопками, на весь лист) */
+.main-logo-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: calc(100vh - 300px);
+    margin-top: 40px;
+    padding: 40px 20px;
+}
+
+.main-page-logo {
+    max-width: 90%;
+    max-height: 70vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 16px rgba(255, 255, 255, 0.15))
+            drop-shadow(0 8px 24px rgba(30, 58, 95, 0.4));
+    opacity: 0.9;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.main-page-logo:hover {
+    opacity: 1;
+    transform: scale(1.02);
+    filter: drop-shadow(0 6px 20px rgba(255, 255, 255, 0.2))
+            drop-shadow(0 10px 30px rgba(30, 58, 95, 0.5));
+}
+
+/* Логотипы в секциях (вверху секций) */
+.section-logo-top {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.section-logo {
+    max-width: 100%;
+    max-height: 120px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.1))
+            drop-shadow(0 4px 12px rgba(30, 58, 95, 0.3));
+    opacity: 0.85;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.section-logo:hover {
+    opacity: 1;
+    transform: scale(1.05);
+    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.2))
+            drop-shadow(0 6px 16px rgba(30, 58, 95, 0.4));
+}
+
+/* Адаптивность для логотипов */
+@media (max-width: 768px) {
+    .logo-fixed {
+        max-height: 45px;
+        max-width: 150px;
+        top: 15px;
+        left: 15px;
+    }
+    
+    .main-page-logo {
+        max-width: 95%;
+        max-height: 60vh;
+    }
+    
+    .section-logo {
+        max-height: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-fixed {
+        max-height: 35px;
+        max-width: 120px;
+        top: 10px;
+        left: 10px;
+    }
+    
+    .main-page-logo {
+        max-width: 98%;
+        max-height: 50vh;
+    }
+    
+    .section-logo {
+        max-height: 60px;
+    }
+    
+    .main-logo-wrapper {
+        min-height: calc(100vh - 250px);
+        padding: 20px 10px;
+    }
+}
+

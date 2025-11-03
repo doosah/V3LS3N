@@ -28,6 +28,12 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    position: relative;
+}
+
+/* Убираем логотип из header-inner, он теперь fixed */
+.header-inner .logo-fixed {
+    display: none;
 }
 
 .warehouse-list {
