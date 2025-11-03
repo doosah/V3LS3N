@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка Railway сервера</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Проверка Railway сервера</h1>
+        
+        <label>URL вашего Railway сервиса:</label>
+        <input type="text" id="railwayUrl" placeholder="https://your-service.railway.app" value="https://your-service.railway.app">
+        
+        <div>
+            <button onclick="checkHealth()">1. Проверить Health Check</button>
+            <button onclick="testTelegram()">2. Тест Telegram</button>
+            <button onclick="checkAll()">3. Проверить всё</button>
+        </div>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function getUrl() {
+            return document.getElementById('railwayUrl').value.trim();
+        }
+
+        function showResult(message, type = 'info') {
+            const result = document.getElementById('result');
+            result.className = `result ${type}`;
+            result.textContent = message;
+        }
+
+        async function checkHealth() {
+            const url = getUrl();
+            if (!url) {
+                showResult('❌ Введите URL сервиса!', 'error');
+                return;
+            }
+
+            showResult('⏳ Проверяю Health Check...', 'info');
+            
+            try {
+                const response = await fetch(`${url}/health`);
+                const text = await response.text();
+                
+                let result = `✅ Status: ${response.status}\n\n`;
+                
+                try {
+                    const json = JSON.parse(text);
+                    result += `📊 JSON ответ:\n${JSON.stringify(json, null, 2)}\n\n`;
+                    result += `✅ Сервер работает правильно!`;
+                    showResult(result, 'success');
+                } catch (e) {
+                    result += `⚠️ Ответ не JSON:\n${text}\n\n`;
+                    result += `Это может быть встроенный health check Railway.\nПроверь логи Railway - должен быть запущен сервер.`;
+                    showResult(result, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Ошибка: ${error.message}\n\nПроверь:\n- Правильность URL\n- Доступность сервиса\n- Логи Railway`, 'error');
+            }
+        }
+
+        async function testTelegram() {
+            const url = getUrl();
+            if (!url) {
+                showResult('❌ Введите URL сервиса!', 'error');
+                return;
+            }
+
+            showResult('⏳ Отправляю тестовое сообщение...', 'info');
+            
+            try {
+                const response = await fetch(`${url}/test`);
+                const text = await response.text();
+                
+                let result = `✅ Status: ${response.status}\n\n`;
+                
+                try {
+                    const json = JSON.parse(text);
+                    result += `📊 JSON ответ:\n${JSON.stringify(json, null, 2)}\n\n`;
+                    
+                    if (json.status === 'success') {
+                        result += `✅ Тестовое сообщение отправлено!\n\n`;
+                        result += `📱 Проверь Telegram чат - должно прийти сообщение.`;
+                        showResult(result, 'success');
+                    } else {
+                        result += `⚠️ Ошибка отправки: ${json.message}`;
+                        showResult(result, 'error');
+                    }
+                } catch (e) {
+                    result += `⚠️ Ответ не JSON:\n${text}`;
+                    showResult(result, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Ошибка: ${error.message}\n\nСервер не отвечает. Проверь логи Railway.`, 'error');
+            }
+        }
+
+        async function checkAll() {
+            showResult('⏳ Проверяю всё...', 'info');
+            
+            await checkHealth();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testTelegram();
+        }
+    </script>
+</body>
+</html>
+
