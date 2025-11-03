@@ -33,7 +33,7 @@
         <div id="mainSection" class="section active">
             <h2>Выберите отчёт</h2>
             <button class="large-button" onclick="selectReport('operational')">📄 Операционные показатели</button>
-            <button class="large-button" onclick="selectReport('personnel')"><img src="img/front.png" alt="Chart" class="chart-icon"> Персонал</button>
+            <button class="large-button" onclick="selectReport('personnel')">📄 Персонал</button>
             <div class="main-logo-wrapper">
                 <img src="img/logo1.png" alt="Main Logo" class="main-page-logo">
             </div>
@@ -107,7 +107,7 @@
             <div class="section-logo-top">
                 <img src="img/logo2.png" alt="Section Logo" class="section-logo-large">
             </div>
-            <h2><img src="img/front.png" alt="Chart" class="chart-icon"> Общий свод по всем складам</h2>
+            <h2>📄 Общий свод по всем складам</h2>
             <div class="checkbox-group">
                 <label><input type="checkbox" id="summaryDay" checked> ☀️ Дневные смены</label>
                 <label><input type="checkbox" id="summaryNight"> 🌙 Ночные смены</label>
@@ -140,13 +140,15 @@
         <div id="summaryTableSection" class="section">
             <h2>📋 Сводная таблица</h2>
             <div class="date-navigation">
-                <div class="date-display-small" id="currentSummaryDate"></div>
                 <div class="date-logo-center">
                     <img src="img/logo3.png" alt="Logo" class="date-navigation-logo">
                 </div>
-                <div class="date-arrows-right">
-                    <button class="date-arrow-btn" onclick="prevSummaryDay()">←</button>
-                    <button class="date-arrow-btn" onclick="nextSummaryDay()">→</button>
+                <div class="date-controls-right">
+                    <div class="date-display-small" id="currentSummaryDate"></div>
+                    <div class="date-arrows-right">
+                        <button class="date-arrow-btn" onclick="prevSummaryDay()">←</button>
+                        <button class="date-arrow-btn" onclick="nextSummaryDay()">→</button>
+                    </div>
                 </div>
             </div>
             <div id="summaryTable"></div>
@@ -160,7 +162,7 @@
             <div class="section-logo-top">
                 <img src="img/logo2.png" alt="Personnel Logo" class="section-logo-large">
             </div>
-            <h2><img src="img/front.png" alt="Chart" class="chart-icon"> Общий свод по персоналу</h2>
+            <h2>📄 Общий свод по персоналу</h2>
             <div class="checkbox-group">
                 <label><input type="checkbox" id="personnelSummaryDay" checked> ☀️ Дневные смены</label>
                 <label><input type="checkbox" id="personnelSummaryNight"> 🌙 Ночные смены</label>
@@ -193,13 +195,15 @@
         <div id="personnelSummaryTableSection" class="section">
             <h2>📋 Сводная таблица по персоналу</h2>
             <div class="date-navigation">
-                <div class="date-display-small" id="currentPersonnelSummaryDate"></div>
                 <div class="date-logo-center">
                     <img src="img/logo3.png" alt="Logo" class="date-navigation-logo">
                 </div>
-                <div class="date-arrows-right">
-                    <button class="date-arrow-btn" onclick="prevPersonnelSummaryDay()">←</button>
-                    <button class="date-arrow-btn" onclick="nextPersonnelSummaryDay()">→</button>
+                <div class="date-controls-right">
+                    <div class="date-display-small" id="currentPersonnelSummaryDate"></div>
+                    <div class="date-arrows-right">
+                        <button class="date-arrow-btn" onclick="prevPersonnelSummaryDay()">←</button>
+                        <button class="date-arrow-btn" onclick="nextPersonnelSummaryDay()">→</button>
+                    </div>
                 </div>
             </div>
             <div id="personnelSummaryTable"></div>

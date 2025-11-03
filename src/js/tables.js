@@ -132,7 +132,7 @@ export function generateSummaryTable(reports, selectedSummaryDate, includeDay, i
     });
 
     html += '</tbody></table></div>';
-    html += `<div class="summary-total"><img src="img/front.png" alt="Chart" class="chart-icon"> Итого по Объёму (план): ${totalVolumePlan}</div>`;
+    html += `<div class="summary-total">📄 Итого по Объёму (план): ${totalVolumePlan}</div>`;
     return html;
 }
 
@@ -197,7 +197,7 @@ export function generatePersonnelSummaryTable(personnelReports, selectedSummaryD
     });
 
     html += '</tbody></table></div>';
-    html += `<div class="summary-total"><img src="img/front.png" alt="Chart" class="chart-icon"> Итого по Штат (план): ${totalStaffPlan}</div>`;
+    html += `<div class="summary-total">📄 Итого по Штат (план): ${totalStaffPlan}</div>`;
     return html;
 }
 

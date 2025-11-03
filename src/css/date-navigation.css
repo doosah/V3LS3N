@@ -6,7 +6,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-md);
-    padding: var(--spacing-md) var(--spacing-xl);
+    padding: 5mm var(--spacing-xl); /* Отступы сверху и снизу по 5мм */
     margin: var(--spacing-xl) 0;
     background: linear-gradient(135deg, rgba(45, 45, 45, 0.4) 0%, rgba(30, 58, 95, 0.4) 100%);
     border: 2px solid var(--brand-accent, #1e3a5f);
@@ -18,6 +18,7 @@
     flex-wrap: nowrap;
     width: 100%;
     box-sizing: border-box;
+    min-height: 120px; /* Увеличена высота полосы */
 }
 
 /* Дата слева */
@@ -39,7 +40,16 @@
     flex-shrink: 0;
 }
 
-/* Стрелки справа (две кнопки рядом) */
+/* Контролы справа (дата сверху, стрелки под ней) */
+.date-controls-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+}
+
+/* Стрелки справа (две кнопки рядом, под датой) */
 .date-arrows-right {
     display: flex;
     align-items: center;
@@ -57,12 +67,29 @@
 }
 
 .date-navigation-logo {
-    max-height: 180px;
+    max-height: calc(100% - 10mm); /* Высота минус отступы 5мм сверху и снизу */
     max-width: 400px;
     width: auto;
     height: auto;
     object-fit: contain;
-    /* Убрано свечение */
+    /* Возвращено свечение */
+    filter: drop-shadow(0 4px 16px rgba(255, 255, 255, 0.4))
+            drop-shadow(0 8px 24px rgba(30, 58, 95, 0.6))
+            drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+    animation: logoGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes logoGlow {
+    0% {
+        filter: drop-shadow(0 4px 16px rgba(255, 255, 255, 0.4))
+                drop-shadow(0 8px 24px rgba(30, 58, 95, 0.6))
+                drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+    }
+    100% {
+        filter: drop-shadow(0 6px 20px rgba(255, 255, 255, 0.6))
+                drop-shadow(0 12px 32px rgba(30, 58, 95, 0.8))
+                drop-shadow(0 0 30px rgba(255, 255, 255, 0.5));
+    }
 }
 
 .date-arrow-btn {
@@ -104,7 +131,12 @@
     .date-navigation {
         flex-direction: row;
         gap: var(--spacing-sm);
-        padding: var(--spacing-md) var(--spacing-lg);
+        padding: 5mm var(--spacing-lg);
+        min-height: 100px;
+    }
+    
+    .date-controls-right {
+        gap: var(--spacing-xs);
     }
     
     .date-arrows-right {
@@ -117,7 +149,7 @@
     }
     
     .date-navigation-logo {
-        max-height: 120px;
+        max-height: calc(100% - 10mm);
         max-width: 280px;
     }
     
@@ -132,7 +164,12 @@
     .date-navigation {
         flex-wrap: nowrap;
         gap: var(--spacing-xs);
-        padding: var(--spacing-sm) var(--spacing-md);
+        padding: 5mm var(--spacing-md);
+        min-height: 80px;
+    }
+    
+    .date-controls-right {
+        gap: var(--spacing-xs);
     }
     
     .date-arrows-right {
@@ -145,7 +182,7 @@
     }
     
     .date-navigation-logo {
-        max-height: 90px;
+        max-height: calc(100% - 10mm);
         max-width: 200px;
     }
     
