@@ -132,7 +132,8 @@ export function generateSummaryTable(reports, selectedSummaryDate, includeDay, i
     });
 
     html += '</tbody></table></div>';
-    html += `<div class="summary-total">📊 Итого по Объёму (план): ${totalVolumePlan}</div>`;
+    const chartIcon = '<svg class="chart-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em;display:inline-block;vertical-align:middle;margin-right:5px;"><rect x="3" y="12" width="4" height="8" fill="#ffffff"/><rect x="10" y="18" width="4" height="2" fill="#ffffff"/><rect x="17" y="6" width="4" height="14" fill="#ffffff"/></svg>';
+    html += `<div class="summary-total">${chartIcon} Итого по Объёму (план): ${totalVolumePlan}</div>`;
     return html;
 }
 
@@ -197,7 +198,8 @@ export function generatePersonnelSummaryTable(personnelReports, selectedSummaryD
     });
 
     html += '</tbody></table></div>';
-    html += `<div class="summary-total">📊 Итого по Штат (план): ${totalStaffPlan}</div>`;
+    const chartIcon = '<svg class="chart-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em;display:inline-block;vertical-align:middle;margin-right:5px;"><rect x="3" y="12" width="4" height="8" fill="#ffffff"/><rect x="10" y="18" width="4" height="2" fill="#ffffff"/><rect x="17" y="6" width="4" height="14" fill="#ffffff"/></svg>';
+    html += `<div class="summary-total">${chartIcon} Итого по Штат (план): ${totalStaffPlan}</div>`;
     return html;
 }
 
