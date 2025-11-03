@@ -1,34 +1,46 @@
-/* Иконка графика (картинка front.png) - размер как у эмодзи */
+/* Иконка графика (картинка front.png) - размер и отступ точно как у эмодзи */
 
 .chart-icon {
     display: inline-block;
     width: 1em;
     height: 1em;
-    vertical-align: baseline;
-    margin-right: 0.4em;
+    vertical-align: middle;
+    margin-right: 0.3em;
     margin-left: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     object-fit: contain;
+    line-height: inherit;
 }
 
 /* Иконка в кнопках должна быть выровнена как эмодзи */
 .large-button .chart-icon {
-    vertical-align: baseline;
+    vertical-align: middle;
     width: 1em;
     height: 1em;
-    margin-right: 0.4em;
+    margin-right: 0.3em;
     margin-left: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     object-fit: contain;
+    line-height: inherit;
 }
 
 /* Иконка в заголовках */
 h2 .chart-icon {
     vertical-align: middle;
-    margin-right: 0.4em;
+    margin-right: 0.3em;
+    width: 1em;
+    height: 1em;
+    line-height: inherit;
 }
 
 /* Иконка в итоговых строках */
 .summary-total .chart-icon {
     vertical-align: middle;
-    margin-right: 0.4em;
+    margin-right: 0.3em;
+    width: 1em;
+    height: 1em;
+    line-height: inherit;
 }
 
