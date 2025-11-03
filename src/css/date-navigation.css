@@ -7,7 +7,7 @@
     justify-content: space-between;
     gap: var(--spacing-md);
     padding: 5mm var(--spacing-xl); /* Отступы сверху и снизу по 5мм */
-    margin: var(--spacing-xl) 0;
+    margin: var(--spacing-sm) 0 var(--spacing-md) 0; /* Поднята выше - уменьшен верхний отступ */
     background: linear-gradient(135deg, rgba(45, 45, 45, 0.4) 0%, rgba(30, 58, 95, 0.4) 100%);
     border: 2px solid var(--brand-accent, #1e3a5f);
     border-radius: var(--radius-lg); /* Унифицированный */
@@ -16,7 +16,10 @@
                 0 1px 0 rgba(255, 255, 255, 0.05);
     position: relative;
     flex-wrap: nowrap;
-    width: 100%;
+    width: 95%; /* Увеличена ширина полосы */
+    max-width: 95%;
+    margin-left: auto;
+    margin-right: auto;
     box-sizing: border-box;
     min-height: 120px; /* Увеличена высота полосы */
 }
