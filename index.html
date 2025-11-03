@@ -2,25 +2,105 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>V3LS3N | Система учёта складов</title>
-    <link rel="stylesheet" href="src/css/styles.css">
-    <link rel="stylesheet" href="src/css/components.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V3LS3N - Тестовая версия</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .content {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <!-- App will be rendered here by JavaScript -->
+    <div class="container">
+        <div class="header">
+            <h1>🚀 V3LS3N - Система учёта складов</h1>
+            <p>Тестовая версия - проект работает!</p>
+        </div>
+        
+        <div class="content">
+            <h2>✅ GitHub Pages работает корректно</h2>
+            <p>Базовые стили загружаются, JavaScript требует доработки</p>
+            
+            <div style="margin: 20px 0;">
+                <button onclick="showMessage()">Тест JavaScript</button>
+                <button onclick="checkConsole()">Проверить консоль</button>
+            </div>
+            
+            <div id="message" style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px; display: none;">
+                <!-- Сообщения будут здесь -->
+            </div>
+        </div>
+        
+        <div class="content">
+            <h3>📋 Следующие шаги:</h3>
+            <ul>
+                <li>Настроить модульную структуру JavaScript</li>
+                <li>Проверить загрузку компонентов</li>
+                <li>Добавить обработку ошибок</li>
+                <li>Протестировать на мобильных устройствах</li>
+            </ul>
+        </div>
     </div>
 
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- App Components -->
-    <script src="src/js/supabase-client.js"></script>
-    <script src="src/js/config.js"></script>
-    <script src="src/js/utils.js"></script>
-    <script src="src/js/components.js"></script>
-    <script src="src/js/app.js"></script>
+    <script>
+        function showMessage() {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '<strong>✅ JavaScript работает!</strong><br>Функции выполняются корректно.';
+            messageDiv.style.display = 'block';
+        }
+        
+        function checkConsole() {
+            console.log('✅ Консоль браузера работает');
+            console.log('📍 Текущий URL:', window.location.href);
+            console.log('🖥️ User Agent:', navigator.userAgent);
+            
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '<strong>📝 Проверьте консоль браузера (F12)</strong><br>Должны увидеть тестовые сообщения.';
+            messageDiv.style.display = 'block';
+        }
+        
+        // Автопроверка при загрузке
+        window.addEventListener('load', function() {
+            console.log('🔄 Страница загружена');
+            document.getElementById('message').innerHTML = '<strong>🔄 Страница загружена успешно</strong><br>Проверьте работу кнопок.';
+            document.getElementById('message').style.display = 'block';
+        });
+    </script>
 </body>
 </html>
