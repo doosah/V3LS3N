@@ -1,46 +1,55 @@
-﻿// ========== MAIN APPLICATION ==========
+﻿// ========== УПРОЩЕННОЕ ПРИЛОЖЕНИЕ V3LS3N ==========
+console.log('🚀 V3LS3N App инициализация...');
 
-class V3LS3NApp {
+class SimpleV3LS3NApp {
     constructor() {
         this.state = {
             currentSection: 'main',
-            currentWarehouse: '',
-            currentPersonnelObj: '',
-            selectedDate: new Date(),
-            reports: JSON.parse(localStorage.getItem('warehouseReports')) || {},
-            personnelReports: JSON.parse(localStorage.getItem('personnelReports')) || {},
-            calendarView: 'week'
+            warehouses: [
+                "АРХАНГЕЛЬСК_ХАБ_НАХИМОВА",
+                "МУРМАНСК_ХАБ_ОБЪЕЗДНАЯ",
+                "ВЕЛИКИЙ_НОВГОРОД_ХАБ_НЕХИНСКАЯ",
+                "ПЕТРОЗАВОДСК_ХАБ_ПРЯЖИНСКОЕ",
+                "ПСКОВ_ХАБ_МАРГЕЛОВА",
+                "ПСКОВ_ХАБ_НОВЫЙ",
+                "СЫКТЫВКАР_ХАБ_ЛЕСОПАРКОВАЯ",
+                "СЫКТЫВКАР_ХАБ_ОКТЯБРЬСКИЙ",
+                "ЧЕРЕПОВЕЦ_ХАБ_СТРОЙИНДУСТРИИ",
+                "ВОЛОГДА_ХАБ_БЕЛОЗЕРСКОЕ",
+                "СПБ_ХАБ_Осиновая Роща",
+                "СПБ_Хаб_Парголово",
+                "СПБ_Хаб_Парголово_Блок_3",
+                "СПБ_Хаб_Парголово_Блок_4"
+            ]
         };
-        
-        this.init();
     }
     
-    async init() {
-        // Load data from Supabase
-        await this.loadData();
-        
-        // Initialize UI
+    init() {
+        console.log('🎯 Инициализация приложения...');
         this.renderApp();
         this.setupEventListeners();
-        
-        // Initialize Supabase real-time subscriptions
-        if (window.supabaseClient) {
-            window.supabaseClient.initializeSupabaseSubscriptions(
-                (type) => this.onDataChange(type)
-            );
-        }
-        
-        console.log('🚀 V3LS3N App initialized');
+        console.log('✅ Приложение запущено!');
     }
     
-    // Render main application
     renderApp() {
         const appContainer = document.getElementById('app');
-        if (!appContainer) return;
+        if (!appContainer) {
+            console.error('❌ Контейнер app не найден');
+            return;
+        }
         
         appContainer.innerHTML = \`
             <div class="container">
-                <div id="header"></div>
+                <div class="header">
+                    <div class="header-inner">
+                        <div class="logo">V3LS3N</div>
+                        <div class="header-text">
+                            <h1>📊 Сводные данные</h1>
+                            <div class="subtitle">Система учёта и аналитики складских операций</div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="mainSection" class="section active">
                     <h2>Выберите отчёт</h2>
                     <button class="large-button" onclick="app.selectReport('operational')">
@@ -50,32 +59,106 @@ class V3LS3NApp {
                         📊 Персонал
                     </button>
                 </div>
+                
                 <div id="warehouseReportSection" class="section">
-                    <h2 id="warehouseTitle">Отчёт по складу</h2>
-                    <div id="warehouseListContainer"></div>
+                    <h2>📦 Отчёт по складу</h2>
+                    <div class="warehouse-list" id="warehouseList"></div>
                     <div class="action-buttons">
-                        <button class="secondary large-button" onclick="app.showSummarySection()">
-                            📋 Сводная таблица
-                        </button>
                         <button class="secondary" onclick="app.backToMain()">
                             ← Назад к выбору отчёта
                         </button>
                     </div>
                 </div>
-                <!-- Additional sections will be added dynamically -->
+                
+                <div id="summarySection" class="section">
+                    <h2>📋 Сводная таблица</h2>
+                    <div class="content" style="padding: 20px; background: rgba(255,255,255,0.1); border-radius: 12px;">
+                        <p>Функционал сводной таблицы будет доступен после настройки операционных отчётов.</p>
+                        <button class="secondary" onclick="app.backToMain()">← Назад</button>
+                    </div>
+                </div>
             </div>
-            <div id="console-output"></div>
+            
+            <div id="console-output" style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: lime; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px; max-width: 300px;">
+                <strong>Консоль отладки:</strong>
+                <div id="console-messages"></div>
+            </div>
         \`;
         
-        // Render header
-        if (window.componentRenderer) {
-            window.componentRenderer.render('header', document.getElementById('header'));
+        this.generateWarehouseList();
+    }
+    
+    generateWarehouseList() {
+        const listContainer = document.getElementById('warehouseList');
+        if (!listContainer) return;
+        
+        listContainer.innerHTML = '';
+        this.state.warehouses.forEach(warehouse => {
+            const button = document.createElement('button');
+            button.className = 'warehouse-btn';
+            button.textContent = warehouse;
+            button.onclick = () => this.selectWarehouse(warehouse);
+            listContainer.appendChild(button);
+        });
+    }
+    
+    selectReport(reportType) {
+        this.hideAllSections();
+        
+        switch(reportType) {
+            case 'operational':
+                document.getElementById('warehouseReportSection').classList.add('active');
+                break;
+            case 'personnel':
+                // Показываем заглушку для персонала
+                this.showMessage('Функционал отчётов по персоналу в разработке');
+                break;
+        }
+        
+        this.log(\`Выбран отчёт: \${reportType}\`);
+    }
+    
+    selectWarehouse(warehouse) {
+        this.log(\`Выбран склад: \${warehouse}\`);
+        this.showMessage(\`Открывается отчёт для склада: \${warehouse}\`);
+    }
+    
+    showSummarySection() {
+        this.hideAllSections();
+        document.getElementById('summarySection').classList.add('active');
+        this.log('Открыта сводная таблица');
+    }
+    
+    backToMain() {
+        this.hideAllSections();
+        document.getElementById('mainSection').classList.add('active');
+        this.log('Возврат в главное меню');
+    }
+    
+    hideAllSections() {
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.remove('active');
+        });
+    }
+    
+    showMessage(message) {
+        this.log(message);
+        alert(message);
+    }
+    
+    log(message) {
+        console.log(message);
+        const consoleMessages = document.getElementById('console-messages');
+        if (consoleMessages) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = \`\${new Date().toLocaleTimeString()}: \${message}\`;
+            consoleMessages.appendChild(messageElement);
+            consoleMessages.scrollTop = consoleMessages.scrollHeight;
         }
     }
     
-    // Setup event listeners
     setupEventListeners() {
-        // Global keyboard shortcuts
+        // Глобальные горячие клавиши
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey || e.metaKey) {
                 switch(e.key) {
@@ -87,171 +170,18 @@ class V3LS3NApp {
                         e.preventDefault();
                         this.selectReport('operational');
                         break;
-                    case '3':
-                        e.preventDefault();
-                        this.selectReport('personnel');
-                        break;
                 }
             }
         });
-    }
-    
-    // Load data from Supabase
-    async loadData() {
-        if (!window.supabaseClient) {
-            console.warn('Supabase client not available, using local storage only');
-            return;
-        }
         
-        try {
-            const data = await window.supabaseClient.loadFromSupabase();
-            
-            // Merge with local data
-            if (data.operational.length > 0) {
-                data.operational.forEach(item => {
-                    if (!this.state.reports[item.report_date]) {
-                        this.state.reports[item.report_date] = {};
-                    }
-                    if (!this.state.reports[item.report_date][item.warehouse]) {
-                        this.state.reports[item.report_date][item.warehouse] = {};
-                    }
-                    this.state.reports[item.report_date][item.warehouse][item.shift_type] = item.data;
-                });
-            }
-            
-            if (data.personnel.length > 0) {
-                data.personnel.forEach(item => {
-                    if (!this.state.personnelReports[item.report_date]) {
-                        this.state.personnelReports[item.report_date] = {};
-                    }
-                    if (!this.state.personnelReports[item.report_date][item.warehouse]) {
-                        this.state.personnelReports[item.report_date][item.warehouse] = {};
-                    }
-                    this.state.personnelReports[item.report_date][item.warehouse][item.shift_type] = item.data;
-                });
-            }
-            
-            // Clean old reports
-            this.cleanOldData();
-            
-            console.log('✓ Data loaded successfully');
-        } catch (error) {
-            console.error('❌ Error loading data:', error);
-        }
-    }
-    
-    // Clean old data
-    cleanOldData() {
-        if (window.appUtils) {
-            this.state.reports = window.appUtils.cleanOldReports(this.state.reports);
-            this.state.personnelReports = window.appUtils.cleanOldReports(this.state.personnelReports);
-            
-            // Save cleaned data
-            localStorage.setItem('warehouseReports', JSON.stringify(this.state.reports));
-            localStorage.setItem('personnelReports', JSON.stringify(this.state.personnelReports));
-        }
-    }
-    
-    // Handle data changes from Supabase
-    onDataChange(type) {
-        console.log(\`Data changed: \${type}\`);
-        this.loadData(); // Reload data
-        
-        // Update UI if needed
-        if (this.state.currentSection.includes('summary')) {
-            this.updateSummaryTables();
-        }
-    }
-    
-    // Navigation methods
-    selectReport(reportType) {
-        this.hideAllSections();
-        
-        switch(reportType) {
-            case 'operational':
-                this.showOperationalReport();
-                break;
-            case 'personnel':
-                this.showPersonnelReport();
-                break;
-        }
-    }
-    
-    showOperationalReport() {
-        document.getElementById('warehouseReportSection').classList.add('active');
-        
-        if (window.componentRenderer && window.appConfig) {
-            window.componentRenderer.render(
-                'warehouse-list', 
-                document.getElementById('warehouseListContainer'), 
-                { 
-                    warehouses: window.appConfig.WAREHOUSES,
-                    onSelect: (warehouse) => this.selectWarehouse(warehouse)
-                }
-            );
-        }
-    }
-    
-    showPersonnelReport() {
-        // Similar implementation for personnel reports
-        console.log('Personnel report selected');
-    }
-    
-    selectWarehouse(warehouse) {
-        this.state.currentWarehouse = warehouse;
-        // Show date selection and form for the selected warehouse
-        this.showWarehouseForm(warehouse);
-    }
-    
-    showWarehouseForm(warehouse) {
-        // Implementation for showing warehouse form
-        console.log('Selected warehouse:', warehouse);
-    }
-    
-    showSummarySection() {
-        // Implementation for summary section
-        console.log('Show summary section');
-    }
-    
-    backToMain() {
-        this.hideAllSections();
-        document.getElementById('mainSection').classList.add('active');
-        this.state.currentWarehouse = '';
-        this.state.currentPersonnelObj = '';
-    }
-    
-    hideAllSections() {
-        document.querySelectorAll('.section').forEach(section => {
-            section.classList.remove('active');
-        });
-    }
-    
-    // Save report method
-    async saveReport() {
-        // Implementation for saving reports
-        console.log('Saving report...');
-        
-        // Sync with Supabase if available
-        if (window.supabaseClient) {
-            // await window.supabaseClient.syncToSupabase(...);
-        }
-    }
-    
-    // Update summary tables
-    updateSummaryTables() {
-        // Implementation for updating summary tables
+        this.log('Обработчики событий установлены');
     }
 }
 
-// Initialize application when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    window.app = new V3LS3NApp();
-});
+// Создаем глобальный экземпляр приложения
+window.app = new SimpleV3LS3NApp();
 
-// Global error handler
-window.addEventListener('error', (e) => {
-    console.error('Global error:', e.error);
-});
+// Экспортируем для глобального доступа
+window.SimpleV3LS3NApp = SimpleV3LS3NApp;
 
-// Export app for global access
-window.V3LS3NApp = V3LS3NApp;
+console.log('✅ V3LS3N App класс загружен');
