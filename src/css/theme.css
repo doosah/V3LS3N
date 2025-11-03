@@ -35,16 +35,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
-    gap: 10px;
+    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-sm);
     flex-wrap: wrap;
 }
 
 .calendar-controls button {
     flex: 1;
     min-width: 100px;
-    padding: 12px 16px;
-    font-size: clamp(12px, 2.5vw, 14px);
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: clamp(14px, 3vw, 16px); /* Пропорциональный clamp */
+    border-radius: var(--radius-md); /* Унифицированный */
 }
 
 button.date-btn {

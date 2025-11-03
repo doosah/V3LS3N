@@ -29,13 +29,19 @@ h2 {
 
 .subtitle-right {
     text-align: right;
-    width: 100%;
-    margin-left: auto;
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
     white-space: nowrap;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .subtitle-right {
+        white-space: normal;
+        text-align: right;
+        font-size: clamp(12px, 2.5vw, 14px);
+    }
 }
 
 .warehouse-btn {
@@ -93,10 +99,10 @@ button {
     position: relative;
     overflow: hidden;
     padding: 14px 24px;
-    border-radius: 8px;
+    border-radius: var(--radius-md); /* Унифицированный */
     cursor: pointer;
-    margin: 5px;
-    font-size: clamp(14px, 3vw, 16px);
+    margin: 0 var(--spacing-sm) var(--spacing-md) 0; /* Система отступов */
+    font-size: clamp(14px, 3vw, 16px); /* Пропорциональный clamp */
     font-weight: 500;
     min-height: var(--touch-target);
     -webkit-tap-highlight-color: transparent;
@@ -152,9 +158,13 @@ button.secondary:hover {
 .large-button {
     width: 100%;
     padding: 18px 40px;
-    font-size: clamp(16px, 4vw, 18px);
+    font-size: clamp(16px, 3.5vw, 18px); /* Пропорциональный clamp */
     font-weight: 600;
     min-height: 52px;
+    margin-bottom: var(--spacing-md); /* Система отступов */
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: var(--radius-md); /* Унифицированный */
 }
 
 .close-full {
@@ -195,8 +205,8 @@ input[type="text"],
 input[type="number"],
 select {
     width: 100%;
-    padding: 14px 16px;
-    border-radius: 8px;
+    padding: var(--spacing-lg); /* Симметричный padding через систему */
+    border-radius: var(--radius-md); /* Унифицированный */
     font-size: 16px;
     -webkit-appearance: none;
     appearance: none;
@@ -207,8 +217,9 @@ select {
                 0 1px 0 rgba(255, 255, 255, 0.05);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e0e0e0' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 40px;
+    background-position: right var(--spacing-md) center;
+    padding-right: calc(var(--spacing-lg) * 3); /* Отступ от иконки через систему */
+    min-height: var(--touch-target); /* Добавлен min-height */
 }
 
 input:focus,
@@ -221,8 +232,8 @@ select:focus {
 
 textarea {
     width: 100%;
-    padding: 14px 16px;
-    border-radius: 8px;
+    padding: var(--spacing-lg); /* Симметричный padding через систему */
+    border-radius: var(--radius-md); /* Унифицированный */
     font-size: 16px;
     resize: vertical;
     border: 1px solid var(--brand-primary, #2d2d2d);
@@ -230,6 +241,7 @@ textarea {
     color: var(--brand-light-1, #ffffff);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3),
                 0 1px 0 rgba(255, 255, 255, 0.05);
+    min-height: var(--touch-target); /* Добавлен min-height */
 }
 
 textarea:focus {
@@ -250,21 +262,21 @@ textarea:focus {
     color: var(--brand-light-1, #ffffff);
     box-shadow: 0 0 15px rgba(30, 58, 95, 0.3),
                 inset 0 1px 2px rgba(255, 255, 255, 0.1);
-    padding: 12px 20px;
-    border-radius: 8px;
-    margin: 15px 0;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--radius-md); /* Унифицированный */
+    margin: var(--spacing-md) 0;
     text-align: center;
     font-weight: 500;
-    font-size: clamp(14px, 3vw, 16px);
+    font-size: clamp(14px, 3vw, 16px); /* Пропорциональный clamp */
 }
 
 .delta-display {
     background: linear-gradient(135deg, rgba(45, 45, 45, 0.2) 0%, rgba(30, 58, 95, 0.2) 100%);
     border: 1px solid var(--brand-primary, #2d2d2d);
     box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.2);
-    padding: 8px 16px;
-    border-radius: 6px;
-    margin-top: 10px;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-sm); /* Унифицированный */
+    margin-top: var(--spacing-sm);
 }
 
 .summary-total {
@@ -276,11 +288,11 @@ textarea:focus {
     box-shadow: 0 8px 25px rgba(30, 58, 95, 0.5),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2),
                 0 0 0 1px var(--brand-primary, #2d2d2d);
-    margin-top: 20px;
-    padding: 20px;
-    border-radius: 12px;
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg); /* Унифицированный */
     text-align: center;
-    font-size: clamp(16px, 4vw, 18px);
+    font-size: clamp(16px, 3.5vw, 18px); /* Пропорциональный clamp */
     font-weight: 600;
 }
 
@@ -302,12 +314,13 @@ textarea:focus {
 }
 
 .category-input {
-    margin-bottom: 20px;
-    padding: 16px;
-    border-radius: 8px;
-    background: rgba(30, 58, 95, 0.15);
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md); /* Унифицированный */
+    background: rgba(30, 58, 95, 0.35); /* Увеличен контраст для лучшей видимости */
     border: 1px solid var(--brand-primary, #2d2d2d);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2),
+                0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .category-input h4 {
@@ -319,15 +332,29 @@ textarea:focus {
 .input-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Адаптивность для узких экранов */
+@media (max-width: 480px) {
+    .input-row {
+        grid-template-columns: 1fr; /* Одна колонка на узких экранах */
+    }
 }
 
 .input-triple, .input-double {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 10px;
-    margin-bottom: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Увеличен minmax для узких экранов */
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Адаптивность для очень узких экранов */
+@media (max-width: 320px) {
+    .input-triple, .input-double {
+        grid-template-columns: 1fr; /* Одна колонка на очень узких экранах */
+    }
 }
 
 .yesno-buttons {
@@ -338,13 +365,15 @@ textarea:focus {
 
 .yesno-btn {
     flex: 1;
-    padding: 12px 20px;
-    border-radius: 8px;
+    min-width: 80px; /* Минимальная ширина для предотвращения слишком узких кнопок */
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--radius-md); /* Унифицированный */
     border: 1px solid rgba(135, 150, 200, 0.3);
     background: rgba(30, 35, 60, 0.4);
     color: var(--text-primary);
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: var(--touch-target); /* Добавлен min-height */
 }
 
 .yesno-btn.yes.selected {
@@ -364,13 +393,35 @@ textarea:focus {
 .checkbox-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
 }
 
 .radio-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* Стили для checkbox и radio элементов */
+.checkbox-group input[type="checkbox"],
+.radio-group input[type="radio"] {
+    width: auto;
+    margin-right: var(--spacing-sm);
+    margin-left: 0;
+    padding: 0;
+    min-height: 20px;
+    min-width: 20px;
+    cursor: pointer;
+    accent-color: var(--brand-accent, #1e3a5f);
+}
+
+.checkbox-group label,
+.radio-group label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+    font-size: clamp(14px, 3vw, 16px);
 }
