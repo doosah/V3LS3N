@@ -23,7 +23,7 @@
     <div class="container">
         <div class="header">
             <div class="header-inner">
-                <img src="img/logo.png" alt="V3LS3N Logo" class="logo-fixed-header">
+                <img src="img/logowhite.png" alt="V3LS3N Logo" class="logo-fixed-header">
                 <div class="header-text">
                     <div class="subtitle subtitle-right">Сервис учета и аналитики доставки хабов</div>
                 </div>
@@ -140,14 +140,14 @@
         <div id="summaryTableSection" class="section">
             <h2>📋 Сводная таблица</h2>
             <div class="date-navigation">
-                <div class="date-arrows-left">
-                    <button class="date-arrow-btn" onclick="prevSummaryDay()">←</button>
-                    <button class="date-arrow-btn" onclick="nextSummaryDay()">→</button>
-                </div>
+                <div class="date-display-small" id="currentSummaryDate"></div>
                 <div class="date-logo-center">
                     <img src="img/logo3.png" alt="Logo" class="date-navigation-logo">
                 </div>
-                <div class="date-display-small" id="currentSummaryDate"></div>
+                <div class="date-arrows-right">
+                    <button class="date-arrow-btn" onclick="prevSummaryDay()">←</button>
+                    <button class="date-arrow-btn" onclick="nextSummaryDay()">→</button>
+                </div>
             </div>
             <div id="summaryTable"></div>
             <div class="action-buttons">
@@ -193,14 +193,14 @@
         <div id="personnelSummaryTableSection" class="section">
             <h2>📋 Сводная таблица по персоналу</h2>
             <div class="date-navigation">
-                <div class="date-arrows-left">
-                    <button class="date-arrow-btn" onclick="prevPersonnelSummaryDay()">←</button>
-                    <button class="date-arrow-btn" onclick="nextPersonnelSummaryDay()">→</button>
-                </div>
+                <div class="date-display-small" id="currentPersonnelSummaryDate"></div>
                 <div class="date-logo-center">
                     <img src="img/logo3.png" alt="Logo" class="date-navigation-logo">
                 </div>
-                <div class="date-display-small" id="currentPersonnelSummaryDate"></div>
+                <div class="date-arrows-right">
+                    <button class="date-arrow-btn" onclick="prevPersonnelSummaryDay()">←</button>
+                    <button class="date-arrow-btn" onclick="nextPersonnelSummaryDay()">→</button>
+                </div>
             </div>
             <div id="personnelSummaryTable"></div>
             <div class="action-buttons">

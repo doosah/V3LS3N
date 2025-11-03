@@ -12,8 +12,12 @@
     object-fit: contain;
     line-height: inherit;
     /* Убираем фон, оставляем только букву W */
-    mix-blend-mode: screen;
-    filter: brightness(1.2) contrast(1.1);
+    background: transparent !important;
+    /* Убираем фон через CSS - используем только прозрачные части изображения */
+    /* Если изображение имеет прозрачный фон, используем его как есть */
+    mix-blend-mode: normal;
+    filter: none;
+    opacity: 1;
 }
 
 /* Иконка в кнопках должна быть выровнена как эмодзи */

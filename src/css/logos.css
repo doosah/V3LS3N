@@ -1,22 +1,19 @@
 /* Стили для логотипов */
 
-/* Логотип в header (всегда видимый, мигающий) */
+/* Логотип в header (всегда видимый, без свечения) */
 .logo-fixed-header {
     height: auto;
     max-height: 50px;
     width: auto;
     max-width: 150px;
     z-index: 1001;
-    filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.1))
-            drop-shadow(0 4px 12px rgba(30, 58, 95, 0.3));
-    animation: logoBlink 2s ease-in-out infinite;
-    transition: transform 0.3s ease, filter 0.3s ease;
+    /* Убрано свечение */
+    transition: transform 0.3s ease;
 }
 
 .logo-fixed-header:hover {
     transform: scale(1.05);
-    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.2))
-            drop-shadow(0 6px 16px rgba(30, 58, 95, 0.4));
+    /* Убрано свечение при hover */
 }
 
 /* Анимация мигания логотипа */
