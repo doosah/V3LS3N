@@ -1,4 +1,4 @@
-/* Иконка графика (картинка front.png) - размер и отступ точно как у эмодзи */
+/* Иконка графика (картинка front.png - только буква W без фона) */
 
 .chart-icon {
     display: inline-block;
@@ -11,6 +11,9 @@
     margin-bottom: 0;
     object-fit: contain;
     line-height: inherit;
+    /* Убираем фон, оставляем только букву W */
+    mix-blend-mode: screen;
+    filter: brightness(1.2) contrast(1.1);
 }
 
 /* Иконка в кнопках должна быть выровнена как эмодзи */
