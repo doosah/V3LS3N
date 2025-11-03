@@ -57,31 +57,70 @@
             border-radius: 8px;
             cursor: pointer;
         }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #43e97b;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🚀 V3LS3N - Система учёта складов</h1>
-            <p>Минимальная рабочая версия</p>
+            <p>Стабильная рабочая версия</p>
         </div>
 
+        <!-- Главное меню -->
         <div id="mainSection" class="section active">
             <h2>Выберите отчёт</h2>
-            <button onclick="showSection('warehouse')">📄 Операционные показатели</button>
-            <button onclick="showSection('personnel')">📊 Персонал</button>
+            <button onclick="showSection('warehouseSection')">📄 Операционные показатели</button>
+            <button onclick="showSection('personnelSection')">📊 Персонал</button>
+            <button onclick="showSection('summarySection')">📋 Сводная таблица</button>
         </div>
 
-        <div id="warehouse" class="section">
+        <!-- Операционные отчёты -->
+        <div id="warehouseSection" class="section">
             <h2>📦 Отчёт по складу</h2>
             <div class="warehouse-list" id="warehouseList"></div>
-            <button onclick="showSection('main')">← Назад</button>
+            <button onclick="showSection('mainSection')">← Назад в главное меню</button>
         </div>
 
-        <div id="personnel" class="section">
+        <!-- Персонал -->
+        <div id="personnelSection" class="section">
             <h2>👥 Отчёт по персоналу</h2>
             <p>Функционал в разработке</p>
-            <button onclick="showSection('main')">← Назад</button>
+            <button onclick="showSection('mainSection')">← Назад в главное меню</button>
+        </div>
+
+        <!-- Сводная таблица -->
+        <div id="summarySection" class="section">
+            <h2>📊 Сводная таблица</h2>
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; margin: 20px 0;">
+                <h3>Данные по всем складам</h3>
+                <p>Общая сводка по операционным показателям</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px;">
+                    <div style="background: rgba(102,126,234,0.3); padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px;">14</div>
+                        <div>Складов</div>
+                    </div>
+                    <div style="background: rgba(67,233,123,0.3); padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px;">28</div>
+                        <div>Смен</div>
+                    </div>
+                    <div style="background: rgba(250,112,154,0.3); padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px;">2</div>
+                        <div>Руководителя</div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="showSection('mainSection')">← Назад в главное меню</button>
         </div>
     </div>
 
@@ -106,21 +145,33 @@
             "СПБ_Хаб_Парголово_Блок_4"
         ];
 
-        // Функция переключения разделов
+        // Функция переключения разделов с проверкой ошибок
         function showSection(sectionName) {
             console.log('Переключение на раздел:', sectionName);
             
-            // Скрыть все разделы
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Показать выбранный раздел
-            document.getElementById(sectionName).classList.add('active');
-            
-            // Если выбран раздел складов - загрузить список
-            if (sectionName === 'warehouse') {
-                loadWarehouses();
+            try {
+                // Скрыть все разделы
+                document.querySelectorAll('.section').forEach(section => {
+                    if (section && section.classList) {
+                        section.classList.remove('active');
+                    }
+                });
+                
+                // Показать выбранный раздел
+                const targetSection = document.getElementById(sectionName);
+                if (targetSection && targetSection.classList) {
+                    targetSection.classList.add('active');
+                } else {
+                    throw new Error('Раздел не найден: ' + sectionName);
+                }
+                
+                // Если выбран раздел складов - загрузить список
+                if (sectionName === 'warehouseSection') {
+                    loadWarehouses();
+                }
+            } catch (error) {
+                console.error('Ошибка при переключении раздела:', error);
+                showNotification('Ошибка: ' + error.message, 'error');
             }
         }
 
@@ -128,6 +179,11 @@
         function loadWarehouses() {
             console.log('Загрузка списка складов...');
             const list = document.getElementById('warehouseList');
+            if (!list) {
+                console.error('Элемент warehouseList не найден');
+                return;
+            }
+            
             list.innerHTML = '';
             
             warehouses.forEach(warehouse => {
@@ -135,12 +191,44 @@
                 button.className = 'warehouse-btn';
                 button.textContent = warehouse;
                 button.onclick = function() {
-                    alert('Выбран склад: ' + warehouse);
+                    selectWarehouse(warehouse);
                 };
                 list.appendChild(button);
             });
             
             console.log('Список складов загружен');
+        }
+
+        // Выбор склада
+        function selectWarehouse(warehouse) {
+            console.log('Выбран склад:', warehouse);
+            showNotification('Выбран склад: ' + warehouse, 'info');
+            
+            // Здесь можно добавить логику загрузки данных по складу
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'info') {
+            console.log('Уведомление:', message);
+            
+            const colors = {
+                info: '#667eea',
+                success: '#43e97b',
+                warning: '#f093fb',
+                error: '#fa709a'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.background = colors[type] || colors.info;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
         }
 
         // Инициализация при загрузке
@@ -150,29 +238,20 @@
             
             // Показываем уведомление о успешной загрузке
             setTimeout(() => {
-                const notification = document.createElement('div');
-                notification.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #43e97b;
-                    color: white;
-                    padding: 15px;
-                    border-radius: 8px;
-                    z-index: 1000;
-                `;
-                notification.textContent = '✅ V3LS3N готов к работе!';
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 3000);
-            }, 1000);
+                showNotification('✅ V3LS3N готов к работе!', 'success');
+            }, 500);
         });
 
         // Обработка ошибок
         window.addEventListener('error', function(e) {
             console.error('❌ Ошибка в приложении:', e.error);
+            showNotification('Произошла ошибка: ' + e.error.message, 'error');
+        });
+
+        // Глобальная обработка необработанных обещаний
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('❌ Необработанное обещание:', e.reason);
+            showNotification('Ошибка Promise: ' + e.reason, 'error');
         });
 
         console.log('✅ Скрипт инициализирован, ожидаем загрузки DOM...');
