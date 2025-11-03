@@ -5,6 +5,8 @@ import { parseTimeToMin, cleanOldReports } from './utils.js';
 import { renderCalendar } from './calendar.js';
 import { loadCategoryInputs, loadPersonnelCategoryInputs, selectYesNo } from './forms.js';
 import { generateSummaryTable, generatePersonnelSummaryTable } from './tables.js';
+import { exportToExcel } from './excel-export.js';
+import { getChatId } from './telegram-bot.js';
 
 // Состояние приложения
 let reports = JSON.parse(localStorage.getItem('warehouseReports')) || {};
@@ -507,6 +509,90 @@ window.toggleCalendarViewPersonnelSummary = toggleCalendarViewPersonnelSummary;
 window.prevPersonnelSummaryDay = prevPersonnelSummaryDay;
 window.nextPersonnelSummaryDay = nextPersonnelSummaryDay;
 window.togglePersonnelFullScreen = togglePersonnelFullScreen;
+
+// Функции экспорта
+function showExportSection() {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('exportSection')?.classList.add('active');
+    
+    // Заполнение списка складов
+    const warehouseSelect = document.getElementById('exportWarehouse');
+    if (warehouseSelect) {
+        warehouseSelect.innerHTML = '<option value="">Все склады</option>';
+        WAREHOUSES.forEach(wh => {
+            const option = document.createElement('option');
+            option.value = wh;
+            option.textContent = wh;
+            warehouseSelect.appendChild(option);
+        });
+    }
+}
+
+async function performExport() {
+    const filters = {
+        dateFrom: document.getElementById('exportDateFrom')?.value || null,
+        dateTo: document.getElementById('exportDateTo')?.value || null,
+        shiftType: document.getElementById('exportShiftType')?.value || null,
+        manager: document.getElementById('exportManager')?.value || null,
+        warehouse: document.getElementById('exportWarehouse')?.value || null,
+        reportType: document.getElementById('exportReportType')?.value || null
+    };
+    
+    // Собираем все данные из reports и personnelReports
+    const allData = [];
+    
+    // Операционные отчеты
+    Object.keys(reports).forEach(key => {
+        const [date, warehouse, shiftType] = key.split('_');
+        if (reports[key]) {
+            allData.push({
+                type: 'operational',
+                date,
+                warehouse,
+                shiftType,
+                ...reports[key]
+            });
+        }
+    });
+    
+    // Отчеты по персоналу
+    Object.keys(personnelReports).forEach(key => {
+        const [date, warehouse, shiftType] = key.split('_');
+        if (personnelReports[key]) {
+            allData.push({
+                type: 'personnel',
+                date,
+                warehouse,
+                shiftType,
+                ...personnelReports[key]
+            });
+        }
+    });
+    
+    try {
+        await exportToExcel(allData, filters);
+        alert('✅ Экспорт выполнен успешно!');
+    } catch (error) {
+        console.error('Ошибка экспорта:', error);
+        alert('❌ Ошибка при экспорте. Проверьте консоль.');
+    }
+}
+
+window.showExportSection = showExportSection;
+window.performExport = performExport;
+
+// Функция для получения chat_id (для настройки)
+window.getTelegramChatId = async function() {
+    const chatId = await getChatId();
+    if (chatId) {
+        alert(`Chat ID найден: ${chatId}\n\nДобавьте его в src/js/telegram-config.js:\nCHAT_ID: '${chatId}'`);
+        console.log('Chat ID:', chatId);
+        return chatId;
+    } else {
+        alert('Chat ID не найден. Отправьте боту сообщение и повторите попытку.');
+        return null;
+    }
+};
 
 // Инициализация
 window.addEventListener('DOMContentLoaded', async () => {

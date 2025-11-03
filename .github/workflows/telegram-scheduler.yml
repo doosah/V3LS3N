@@ -1,0 +1,44 @@
+# GitHub Actions Workflow для Telegram планировщика
+# Работает без отдельного сервера
+
+name: Telegram Scheduler
+
+on:
+  schedule:
+    # Дневная смена - напоминание (07:45 МСК = 04:45 UTC)
+    - cron: '45 4 * * *'
+    # Дневная смена - финальный отчет (08:00 МСК = 05:00 UTC)
+    - cron: '0 5 * * *'
+    # Ночная смена - напоминание (21:45 МСК = 18:45 UTC)
+    - cron: '45 18 * * *'
+    # Ночная смена - финальный отчет (22:00 МСК = 19:00 UTC)
+    - cron: '0 19 * * *'
+  workflow_dispatch: # Ручной запуск
+
+jobs:
+  send-reports:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: |
+          cd server
+          npm install
+      
+      - name: Run scheduler
+        run: |
+          cd server
+          node index.js
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+

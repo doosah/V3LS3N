@@ -34,6 +34,7 @@
             <h2>Выберите отчёт</h2>
             <button class="large-button" onclick="selectReport('operational')">📄 Операционные показатели</button>
             <button class="large-button" onclick="selectReport('personnel')">📄 Персонал</button>
+            <button class="large-button" onclick="showExportSection()">📊 Экспорт Excel</button>
             <div class="main-logo-wrapper">
                 <img src="img/logo1.png" alt="Main Logo" class="main-page-logo">
             </div>
@@ -223,11 +224,75 @@
             <div id="fullPersonnelSummaryTable"></div>
         </div>
 
+        <div id="exportSection" class="section">
+            <h2>📊 Экспорт Excel</h2>
+            <div class="export-form">
+                <div class="filter-section">
+                    <h4>Параметры экспорта</h4>
+                    <div class="category-input">
+                        <label>Период:</label>
+                        <div class="input-row">
+                            <div>
+                                <label for="exportDateFrom">С даты:</label>
+                                <input type="date" id="exportDateFrom">
+                            </div>
+                            <div>
+                                <label for="exportDateTo">По дату:</label>
+                                <input type="date" id="exportDateTo">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="category-input">
+                        <label for="exportShiftType">Тип смены:</label>
+                        <select id="exportShiftType">
+                            <option value="">Все смены</option>
+                            <option value="day">Дневная</option>
+                            <option value="night">Ночная</option>
+                        </select>
+                    </div>
+                    
+                    <div class="category-input">
+                        <label for="exportManager">Руководитель:</label>
+                        <select id="exportManager">
+                            <option value="">Все руководители</option>
+                            <option value="Территория 1 Шутин Д.М.">Территория 1 Шутин Д.М.</option>
+                            <option value="Территория 2 Любавкская М.И.">Территория 2 Любавкская М.И.</option>
+                        </select>
+                    </div>
+                    
+                    <div class="category-input">
+                        <label for="exportWarehouse">Склад:</label>
+                        <select id="exportWarehouse">
+                            <option value="">Все склады</option>
+                        </select>
+                    </div>
+                    
+                    <div class="category-input">
+                        <label for="exportReportType">Тип отчета:</label>
+                        <select id="exportReportType">
+                            <option value="">Все отчеты</option>
+                            <option value="operational">Операционные показатели</option>
+                            <option value="personnel">Персонал</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="large-button" onclick="performExport()">📊 Экспортировать в Excel</button>
+                    <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+                </div>
+            </div>
+        </div>
+
         <div id="console-output"></div>
     </div>
 
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- SheetJS для Excel экспорта -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.full.min.js"></script>
     
     <!-- JavaScript Modules -->
     <script type="module" src="src/js/app.js"></script>
