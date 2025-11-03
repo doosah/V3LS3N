@@ -120,6 +120,17 @@
                     <option value="Территория 2 Любавкская М.И.">Территория 2 Любавкская М.И.</option>
                 </select>
             </div>
+            <div class="date-section">
+                <h3>📅 Выберите дату для анализа</h3>
+                <div class="calendar-controls">
+                    <button class="secondary" onclick="prevPeriodSummary()">← Предыдущий</button>
+                    <button class="secondary" onclick="toggleCalendarViewSummary()">
+                        <span id="summaryViewToggleText">📆 Месяц</span>
+                    </button>
+                    <button class="secondary" onclick="nextPeriodSummary()">Следующий →</button>
+                </div>
+                <div id="summaryCalendar" class="calendar"></div>
+            </div>
             <div class="action-buttons">
                 <button onclick="showSummaryData()">📈 Показать сводные данные</button>
                 <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
@@ -158,6 +169,17 @@
                     <option value="Территория 1 Шутин Д.М.">Территория 1 Шутин Д.М.</option>
                     <option value="Территория 2 Любавкская М.И.">Территория 2 Любавкская М.И.</option>
                 </select>
+            </div>
+            <div class="date-section">
+                <h3>📅 Выберите дату для анализа</h3>
+                <div class="calendar-controls">
+                    <button class="secondary" onclick="prevPeriodPersonnelSummary()">← Предыдущий</button>
+                    <button class="secondary" onclick="toggleCalendarViewPersonnelSummary()">
+                        <span id="personnelSummaryViewToggleText">📆 Месяц</span>
+                    </button>
+                    <button class="secondary" onclick="nextPeriodPersonnelSummary()">Следующий →</button>
+                </div>
+                <div id="personnelSummaryCalendar" class="calendar"></div>
             </div>
             <div class="action-buttons">
                 <button onclick="showPersonnelSummaryData()">📈 Показать сводные данные</button>
