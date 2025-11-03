@@ -48,12 +48,10 @@ Write-Host ""
 Write-Host "2. Copy repository URL (for example):" -ForegroundColor White
 Write-Host "   https://github.com/doosah/V3LS3N-telegram-bot.git" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "3. Press Enter and paste URL..." -ForegroundColor Yellow
+Write-Host "3. Paste URL below and press Enter" -ForegroundColor Yellow
 Write-Host ""
 
-Read-Host "Press Enter when you created repository on GitHub"
-
-$githubUrl = Read-Host "Paste repository URL (e.g., https://github.com/doosah/V3LS3N-telegram-bot.git)"
+$githubUrl = Read-Host "Paste repository URL"
 
 if ([string]::IsNullOrWhiteSpace($githubUrl)) {
     Write-Host "Error: URL not entered!" -ForegroundColor Red
