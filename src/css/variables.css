@@ -36,5 +36,13 @@
     --radius-md: 8px;
     --radius-lg: 12px;
     --radius-xl: 16px;
+    
+    /* Типографическая шкала */
+    --font-xs: clamp(11px, 2vw, 12px);
+    --font-sm: clamp(12px, 2.5vw, 14px);
+    --font-base: clamp(14px, 3vw, 16px);
+    --font-md: clamp(16px, 3.5vw, 18px);
+    --font-lg: clamp(18px, 4vw, 20px);
+    --font-xl: clamp(20px, 4.5vw, 24px);
 }
 

@@ -1,29 +1,141 @@
 /* Responsive Styles */
 @media (max-width: 768px) {
-    body { padding: 8px; }
-    .container { border-radius: 16px; }
-    .header { padding: 16px; }
-    .section { padding: 16px; }
-    .warehouse-list { grid-template-columns: 1fr; gap: 10px; }
-    .calendar-controls { flex-direction: column; }
-    .calendar-controls button { width: 100%; }
-    button { font-size: 14px; padding: 12px 20px; }
-    table { font-size: 7px; transform: scale(0.9); width: calc(100% / 0.9); }
+    body { 
+        padding: var(--spacing-xs);
+        align-items: stretch;
+    }
+    .container { 
+        border-radius: var(--radius-lg);
+        max-width: 100%;
+        margin: 0;
+        min-height: 100vh;
+    }
+    .header { 
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .section { 
+        padding: var(--spacing-md);
+        width: 100%;
+    }
+    .warehouse-list { 
+        grid-template-columns: 1fr; 
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+    }
+    .calendar-controls { 
+        flex-direction: column; 
+        gap: var(--spacing-sm);
+    }
+    .calendar-controls button { 
+        width: 100%;
+        margin: 0;
+    }
+    button { 
+        font-size: var(--font-base);
+        padding: var(--spacing-md) var(--spacing-lg);
+        margin: 0 0 var(--spacing-sm) 0;
+        width: 100%;
+    }
+    .large-button {
+        width: 100%;
+        margin-bottom: var(--spacing-md);
+    }
+    table { 
+        font-size: 9px; 
+        transform: scale(0.9); 
+        width: calc(100% / 0.9); 
+    }
     td:first-child, th:first-child { width: 60px; min-width: 60px; max-width: 60px; }
     td:nth-child(2), th:nth-child(2) { width: 120px; min-width: 120px; max-width: 120px; left: 60px; }
     th:nth-child(n+3), td:nth-child(n+3) { min-width: 30px; max-width: 40px; padding: 2px 1px; }
-    .close-full { top: 10px; right: 10px; padding: 12px 20px; }
+    .close-full { 
+        top: var(--spacing-sm); 
+        right: var(--spacing-sm); 
+        padding: var(--spacing-sm) var(--spacing-lg);
+    }
+    .action-buttons {
+        width: 100%;
+        gap: var(--spacing-sm);
+    }
+    .action-buttons button {
+        width: 100%;
+        margin: 0;
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: var(--spacing-lg);
+        font-size: var(--font-lg);
+    }
 }
 
 @media (max-width: 480px) {
-    .warehouse-btn { font-size: 12px; padding: 14px; }
-    h1 { font-size: 20px; }
-    h2 { font-size: 18px; }
-    button { font-size: 14px; padding: 12px 20px; }
-    table { font-size: 6px; transform: scale(0.85); width: calc(100% / 0.85); }
+    body {
+        padding: var(--spacing-xs);
+    }
+    .container {
+        border-radius: var(--radius-md);
+    }
+    .header {
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    .section {
+        padding: var(--spacing-sm);
+    }
+    .warehouse-btn { 
+        font-size: var(--font-sm);
+        padding: var(--spacing-md);
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+    h1 { 
+        font-size: var(--font-lg);
+        text-align: center;
+        margin-bottom: var(--spacing-md);
+    }
+    h2 { 
+        font-size: var(--font-md);
+        text-align: center;
+        margin-bottom: var(--spacing-md);
+    }
+    button { 
+        font-size: var(--font-sm);
+        padding: var(--spacing-md);
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+    .large-button {
+        width: 100%;
+        padding: var(--spacing-md);
+        font-size: var(--font-sm);
+    }
+    table { 
+        font-size: 9px; 
+        transform: scale(0.85); 
+        width: calc(100% / 0.85);
+    }
     td:first-child, th:first-child { width: 55px; min-width: 55px; max-width: 55px; }
     td:nth-child(2), th:nth-child(2) { width: 110px; min-width: 110px; max-width: 110px; left: 55px; }
-    .logo { height: 32px; }
+    .logo-fixed-header { 
+        height: 32px;
+        width: auto;
+    }
+    .header-inner {
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+    }
+    .subtitle-right {
+        font-size: var(--font-xs);
+        text-align: center;
+        width: 100%;
+        margin-top: var(--spacing-xs);
+    }
+    .action-buttons {
+        width: 100%;
+    }
+    .action-buttons button {
+        width: 100%;
+    }
 }
 
 @media (orientation: portrait) {

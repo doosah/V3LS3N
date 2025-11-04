@@ -1,10 +1,9 @@
 /* Стили для навигации по датам в таблицах */
 
 .date-navigation {
-    display: flex !important;
-    flex-direction: row;
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr; /* Три колонки: пусто | логотип | контролы */
     align-items: center;
-    justify-content: space-between;
     gap: var(--spacing-md);
     padding: 5mm var(--spacing-xl); /* Отступы сверху и снизу по 5мм */
     margin: var(--spacing-sm) 0 var(--spacing-md) 0; /* Поднята выше - уменьшен верхний отступ */
@@ -15,7 +14,6 @@
                 0 2px 10px rgba(30, 58, 95, 0.3),
                 0 1px 0 rgba(255, 255, 255, 0.05);
     position: relative;
-    flex-wrap: nowrap;
     width: 95%; /* Увеличена ширина полосы */
     max-width: 95%;
     margin-left: auto;
@@ -28,7 +26,7 @@
 .date-display-small {
     display: inline-block;
     text-align: center;
-    font-size: clamp(16px, 3.5vw, 20px);
+    font-size: var(--font-md);
     font-weight: 700;
     color: var(--brand-light-1, #ffffff);
     padding: var(--spacing-sm) var(--spacing-lg);
@@ -46,11 +44,11 @@
 
 /* Контролы справа (дата сверху, стрелки под ней) */
 .date-controls-right {
+    grid-column: 3; /* Контролы справа */
     display: flex;
     flex-direction: column;
-    align-items: stretch;
     gap: var(--spacing-sm);
-    flex-shrink: 0;
+    justify-self: end;
     width: fit-content;
     min-width: 0;
 }
@@ -71,11 +69,10 @@
 
 /* Логотип в центре (крупный и подсвеченный) */
 .date-logo-center {
-    flex: 1;
+    grid-column: 2; /* Логотип всегда в центре */
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0 auto;
 }
 
 .date-navigation-logo {

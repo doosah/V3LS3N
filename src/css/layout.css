@@ -1,8 +1,12 @@
 /* Layout Styles */
 .section {
-    padding: var(--spacing-sm) var(--spacing-xl) var(--spacing-xl); /* Поднято выше - уменьшен верхний padding */
+    padding: var(--spacing-lg) var(--spacing-xl) var(--spacing-xl);
     display: none;
     animation: fadeIn 0.3s ease-in;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0 auto;
 }
 
 .section.active {
@@ -21,17 +25,31 @@
     border-bottom: 2px solid var(--brand-primary, #2d2d2d);
     box-shadow: 0 4px 20px rgba(30, 58, 95, 0.3),
                 0 0 0 1px rgba(45, 45, 45, 0.1);
-    padding: 16px 20px;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0; /* Скругление только сверху */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .header-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    position: relative;
+    gap: var(--spacing-md);
     width: 100%;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* Не переносить */
+    min-width: 0; /* Позволить shrink */
+}
+
+@media (max-width: 640px) {
+    .header-inner {
+        flex-wrap: wrap; /* Только на очень узких экранах */
+        justify-content: center;
+    }
+    
+    .logo-fixed-header {
+        margin-bottom: var(--spacing-sm);
+    }
 }
 
 .header-text {
@@ -50,29 +68,47 @@
 .warehouse-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+@media (max-width: 320px) {
+    .warehouse-list {
+        grid-template-columns: 1fr; /* Одна колонка на очень узких */
+    }
 }
 
 .action-buttons {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-xl);
+}
+
+@media (min-width: 768px) {
+    .action-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .action-buttons button {
+        flex: 1;
+        min-width: 200px;
+    }
 }
 
 .filter-section {
     padding: var(--spacing-lg);
     border-radius: var(--radius-lg); /* Унифицированный */
     margin-bottom: var(--spacing-xl);
-    background: linear-gradient(135deg, rgba(45, 45, 45, 0.2) 0%, rgba(30, 58, 95, 0.2) 100%);
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.2) 0%, rgba(45, 45, 45, 0.2) 100%);
     border: 1px solid var(--brand-primary, #2d2d2d);
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3),
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4),
                 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .date-section {
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
     border-radius: var(--radius-lg); /* Унифицированный */
     margin-bottom: var(--spacing-xl);
     background: linear-gradient(135deg, rgba(30, 58, 95, 0.2) 0%, rgba(45, 45, 45, 0.2) 100%);
@@ -102,5 +138,14 @@
     box-sizing: border-box;
     -webkit-overflow-scrolling: touch;
     border: 2px solid var(--brand-primary, #2d2d2d);
+}
+
+.full-screen-table .close-full {
+    position: sticky;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    float: right;
+    margin-bottom: var(--spacing-lg);
+    z-index: 10;
 }
 

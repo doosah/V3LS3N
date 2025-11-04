@@ -9,10 +9,10 @@
 .calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 3px;
-    margin: 15px 0;
-    padding: 10px;
-    border-radius: 12px;
+    gap: var(--spacing-xs);
+    margin: var(--spacing-md) 0;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
     background: rgba(30, 58, 95, 0.2);
     border: 1px solid var(--brand-primary, #2d2d2d);
     box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4),
@@ -44,13 +44,14 @@
     flex: 1;
     min-width: 100px;
     padding: var(--spacing-md) var(--spacing-lg);
-    font-size: clamp(14px, 3vw, 16px); /* Пропорциональный clamp */
+    font-size: var(--font-base);
     border-radius: var(--radius-md); /* Унифицированный */
+    margin: 0; /* Обнулить margin для кнопок в calendar-controls */
 }
 
 button.date-btn {
     padding: 8px 4px;
-    font-size: clamp(11px, 2.2vw, 13px);
+    font-size: var(--font-xs);
     min-height: 36px;
     width: 100%;
     display: flex;

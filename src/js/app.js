@@ -541,33 +541,82 @@ async function performExport() {
     // Собираем все данные из reports и personnelReports
     const allData = [];
     
+    console.log('📊 Начало экспорта. Reports keys:', Object.keys(reports).length);
+    console.log('📊 PersonnelReports keys:', Object.keys(personnelReports).length);
+    
     // Операционные отчеты
-    Object.keys(reports).forEach(key => {
-        const [date, warehouse, shiftType] = key.split('_');
-        if (reports[key]) {
-            allData.push({
-                type: 'operational',
-                date,
-                warehouse,
-                shiftType,
-                ...reports[key]
+    // Структура: reports[date][warehouse][shiftType][category] = data
+    Object.keys(reports).forEach(date => {
+        if (reports[date] && typeof reports[date] === 'object') {
+            Object.keys(reports[date]).forEach(warehouse => {
+                if (reports[date][warehouse] && typeof reports[date][warehouse] === 'object') {
+                    Object.keys(reports[date][warehouse]).forEach(shiftType => {
+                        if (reports[date][warehouse][shiftType] && typeof reports[date][warehouse][shiftType] === 'object') {
+                            const reportData = reports[date][warehouse][shiftType];
+                            
+                            // Проверяем что есть данные
+                            const hasData = Object.keys(reportData).length > 0;
+                            if (hasData) {
+                                // Добавляем данные с категориями как отдельными полями
+                                const reportRecord = {
+                                    type: 'operational',
+                                    date: date,
+                                    warehouse: warehouse,
+                                    shiftType: shiftType
+                                };
+                                
+                                // Добавляем все категории
+                                Object.keys(reportData).forEach(categoryName => {
+                                    reportRecord[categoryName] = reportData[categoryName];
+                                });
+                                
+                                allData.push(reportRecord);
+                                console.log(`📊 Добавлен операционный отчет: ${date}, ${warehouse}, ${shiftType}, категорий: ${Object.keys(reportData).length}`);
+                            }
+                        }
+                    });
+                }
             });
         }
     });
     
     // Отчеты по персоналу
-    Object.keys(personnelReports).forEach(key => {
-        const [date, warehouse, shiftType] = key.split('_');
-        if (personnelReports[key]) {
-            allData.push({
-                type: 'personnel',
-                date,
-                warehouse,
-                shiftType,
-                ...personnelReports[key]
+    // Структура: personnelReports[date][warehouse][shiftType][category] = data
+    Object.keys(personnelReports).forEach(date => {
+        if (personnelReports[date] && typeof personnelReports[date] === 'object') {
+            Object.keys(personnelReports[date]).forEach(warehouse => {
+                if (personnelReports[date][warehouse] && typeof personnelReports[date][warehouse] === 'object') {
+                    Object.keys(personnelReports[date][warehouse]).forEach(shiftType => {
+                        if (personnelReports[date][warehouse][shiftType] && typeof personnelReports[date][warehouse][shiftType] === 'object') {
+                            const reportData = personnelReports[date][warehouse][shiftType];
+                            
+                            // Проверяем что есть данные
+                            const hasData = Object.keys(reportData).length > 0;
+                            if (hasData) {
+                                // Добавляем данные с категориями как отдельными полями
+                                const reportRecord = {
+                                    type: 'personnel',
+                                    date: date,
+                                    warehouse: warehouse,
+                                    shiftType: shiftType
+                                };
+                                
+                                // Добавляем все категории
+                                Object.keys(reportData).forEach(categoryName => {
+                                    reportRecord[categoryName] = reportData[categoryName];
+                                });
+                                
+                                allData.push(reportRecord);
+                                console.log(`📊 Добавлен отчет персонала: ${date}, ${warehouse}, ${shiftType}, категорий: ${Object.keys(reportData).length}`);
+                            }
+                        }
+                    });
+                }
             });
         }
     });
+    
+    console.log(`📊 Всего собрано записей для экспорта: ${allData.length}`);
     
     try {
         await exportToExcel(allData, filters);

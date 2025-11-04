@@ -4,7 +4,7 @@ table {
     min-width: 600px;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: clamp(7px, 1.8vw, 10px);
+    font-size: clamp(9px, 1.8vw, 11px); /* Минимум 9px вместо 7px */
     table-layout: fixed;
     transform: scale(0.95);
     transform-origin: top left;
@@ -22,7 +22,7 @@ th, td {
 }
 
 th {
-    font-size: clamp(7px, 1.8vw, 9px);
+    font-size: clamp(9px, 1.8vw, 10px); /* Минимум 9px вместо 7px */
     line-height: 1.3;
     padding: 6px 4px;
     position: sticky;
@@ -38,7 +38,7 @@ td:first-child, th:first-child {
     position: sticky;
     left: 0;
     z-index: 5;
-    font-size: clamp(7px, 1.8vw, 9px);
+    font-size: clamp(9px, 1.8vw, 10px); /* Минимум 9px вместо 7px */
 }
 
 th:first-child {

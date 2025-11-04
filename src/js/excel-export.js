@@ -1,6 +1,6 @@
 // Экспорт данных в Excel
 
-import { WAREHOUSES } from './config.js';
+import { WAREHOUSES, CATEGORIES, PERSONNEL_CATEGORIES } from './config.js';
 
 /**
  * Создание Excel файла из данных
@@ -21,6 +21,25 @@ export async function exportToExcel(data, filters = {}) {
         // Фильтрация данных
         let filteredData = filterData(data, filters);
         
+        console.log('📊 Экспорт Excel:', {
+            totalRecords: filteredData.length,
+            operational: filteredData.filter(d => d.type === 'operational').length,
+            personnel: filteredData.filter(d => d.type === 'personnel').length,
+            filters
+        });
+        
+        // Проверка на пустые данные
+        if (!filteredData || filteredData.length === 0) {
+            console.warn('⚠️ Нет данных для экспорта. Проверьте фильтры и наличие данных в системе.');
+            alert('⚠️ Нет данных для экспорта. Проверьте фильтры и наличие данных в системе.');
+            // Создаем пустой файл с заголовками для примера
+            const emptyWs = XLSX.utils.aoa_to_sheet([['Нет данных для экспорта']]);
+            XLSX.utils.book_append_sheet(wb, emptyWs, 'Пусто');
+            const fileName = generateFileName(filters);
+            XLSX.writeFile(wb, fileName);
+            return false;
+        }
+        
         // Создание листов для каждого типа отчета
         if (filters.reportType === 'operational' || !filters.reportType) {
             const operationalData = filteredData.filter(d => d.type === 'operational');
@@ -38,15 +57,27 @@ export async function exportToExcel(data, filters = {}) {
             }
         }
         
+        // Проверка что есть хотя бы один лист
+        if (wb.SheetNames.length === 0) {
+            throw new Error('Нет данных для экспорта. Проверьте фильтры.');
+        }
+        
         // Сохранение файла
         const fileName = generateFileName(filters);
         XLSX.writeFile(wb, fileName);
         
+        console.log('✅ Excel файл сохранен:', fileName);
         return true;
     } catch (error) {
-        console.error('Ошибка экспорта в Excel:', error);
+        console.error('❌ Ошибка экспорта в Excel:', error);
+        alert(`❌ Ошибка при экспорте: ${error.message}\n\nПроверьте консоль для подробностей.`);
         // Fallback: создание CSV
-        return exportToCSV(data, filters);
+        try {
+            return exportToCSV(data, filters);
+        } catch (csvError) {
+            console.error('❌ Ошибка CSV экспорта:', csvError);
+            return false;
+        }
     }
 }
 
@@ -91,40 +122,91 @@ function filterData(data, filters) {
  * Создание листа для операционных отчетов
  */
 function createOperationalSheet(data, XLSX) {
-    const headers = [
-        'Дата', 'Склад', 'Смена', 'Руководитель', 
-        'Объем (план)', 'Объем (факт)', 'Отклонение',
-        'ХА', 'Риски', 'Примечания'
-    ];
+    // Создаем расширенные заголовки с категориями
+    const baseHeaders = ['Дата', 'Склад', 'Смена', 'Руководитель'];
+    const categoryHeaders = [];
     
-    const rows = data.map(report => [
-        report.date,
-        report.warehouse,
-        report.shiftType === 'day' ? 'Дневная' : 'Ночная',
-        report.manager || '',
-        report.volumePlan || 0,
-        report.volumeFact || 0,
-        (report.volumeFact || 0) - (report.volumePlan || 0),
-        report.warehouseCode || '',
-        report.hasRisks ? 'Да' : 'Нет',
-        report.notes || ''
-    ]);
+    // Добавляем заголовки для всех категорий
+    CATEGORIES.forEach(cat => {
+        if (cat.type === 'single' || cat.type === 'yesno' || cat.type === 'select') {
+            categoryHeaders.push(cat.name);
+        } else if (cat.type === 'triple') {
+            cat.fields.forEach(f => categoryHeaders.push(`${cat.name} - ${f.n}`));
+        } else if (cat.type === 'double') {
+            cat.fields.forEach(f => categoryHeaders.push(`${cat.name} - ${f.n}`));
+        } else if (cat.type === 'time') {
+            categoryHeaders.push(`${cat.name} - План`, `${cat.name} - Факт`, `${cat.name} - Δ`);
+        } else if (cat.type === 'number') {
+            categoryHeaders.push(`${cat.name} - План`, `${cat.name} - Факт`, `${cat.name} - Δ`);
+        }
+    });
+    
+    const headers = [...baseHeaders, ...categoryHeaders];
+    
+    // Преобразуем данные в строки
+    const rows = data.map(report => {
+        const row = [
+            report.date || '',
+            report.warehouse || '',
+            report.shiftType === 'day' ? 'Дневная' : (report.shiftType === 'night' ? 'Ночная' : ''),
+            report.manager || report['Руководитель']?.value || ''
+        ];
+        
+        // Добавляем данные по категориям
+        CATEGORIES.forEach(cat => {
+            const catData = report[cat.name];
+            
+            if (cat.type === 'single') {
+                row.push(catData?.value || '');
+            } else if (cat.type === 'yesno') {
+                const val = catData?.value;
+                if (val === true || val === 'yes') {
+                    row.push('Да');
+                } else if (val === false || val === 'no') {
+                    row.push('Нет');
+                } else {
+                    row.push('');
+                }
+            } else if (cat.type === 'select') {
+                row.push(catData?.value || '');
+            } else if (cat.type === 'triple' || cat.type === 'double') {
+                cat.fields.forEach(f => {
+                    row.push(catData?.[f.n] || '');
+                });
+            } else if (cat.type === 'time') {
+                row.push(catData?.plan || '', catData?.fact || '', '');
+            } else if (cat.type === 'number') {
+                const plan = parseFloat(catData?.plan) || 0;
+                const fact = parseFloat(catData?.fact) || 0;
+                row.push(plan, fact, fact - plan);
+            }
+        });
+        
+        return row;
+    });
     
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     
     // Настройка ширины столбцов
-    worksheet['!cols'] = [
+    const colWidths = [
         { wch: 12 }, // Дата
-        { wch: 20 }, // Склад
+        { wch: 25 }, // Склад
         { wch: 10 }, // Смена
-        { wch: 25 }, // Руководитель
-        { wch: 15 }, // Объем (план)
-        { wch: 15 }, // Объем (факт)
-        { wch: 15 }, // Отклонение
-        { wch: 10 }, // ХА
-        { wch: 10 }, // Риски
-        { wch: 30 }  // Примечания
+        { wch: 30 }, // Руководитель
     ];
+    
+    // Добавляем ширины для категорий
+    CATEGORIES.forEach(cat => {
+        if (cat.type === 'single' || cat.type === 'yesno' || cat.type === 'select') {
+            colWidths.push({ wch: 15 });
+        } else if (cat.type === 'triple' || cat.type === 'double') {
+            cat.fields.forEach(() => colWidths.push({ wch: 15 }));
+        } else if (cat.type === 'time' || cat.type === 'number') {
+            colWidths.push({ wch: 12 }, { wch: 12 }, { wch: 12 });
+        }
+    });
+    
+    worksheet['!cols'] = colWidths;
     
     return worksheet;
 }
@@ -133,40 +215,82 @@ function createOperationalSheet(data, XLSX) {
  * Создание листа для отчетов по персоналу
  */
 function createPersonnelSheet(data, XLSX) {
-    const headers = [
-        'Дата', 'Склад', 'Смена', 'Руководитель',
-        'Штат (план)', 'Штат (факт)', 'Отклонение',
-        'Примечания'
-    ];
+    // Создаем расширенные заголовки с категориями
+    const baseHeaders = ['Дата', 'Склад', 'Смена', 'Руководитель'];
+    const categoryHeaders = [];
     
+    // Добавляем заголовки для всех категорий персонала
+    PERSONNEL_CATEGORIES.forEach(cat => {
+        if (cat.type === 'single' || cat.type === 'select') {
+            categoryHeaders.push(cat.name);
+        } else if (cat.type === 'triple') {
+            cat.fields.forEach(f => categoryHeaders.push(`${cat.name} - ${f.n}`));
+        } else if (cat.type === 'quadruple') {
+            cat.fields.forEach(f => categoryHeaders.push(`${cat.name} - ${f.n}`));
+        } else if (cat.type === 'number') {
+            categoryHeaders.push(`${cat.name} - План`, `${cat.name} - Факт`, `${cat.name} - Δ`);
+        } else if (cat.type === 'text') {
+            categoryHeaders.push(cat.name);
+        }
+    });
+    
+    const headers = [...baseHeaders, ...categoryHeaders];
+    
+    // Преобразуем данные в строки
     const rows = data.map(report => {
-        // Преобразуем данные из структуры personnelReports
-        const reportData = report.data || report;
-        return [
-            report.date,
-            report.warehouse,
-            report.shiftType === 'day' ? 'Дневная' : 'Ночная',
-            reportData.manager || report.manager || '',
-            reportData.staffPlan || reportData.personnel || 0,
-            reportData.staffFact || reportData.personnel || 0,
-            (reportData.staffFact || reportData.personnel || 0) - (reportData.staffPlan || reportData.personnel || 0),
-            reportData.notes || ''
+        const row = [
+            report.date || '',
+            report.warehouse || '',
+            report.shiftType === 'day' ? 'Дневная' : (report.shiftType === 'night' ? 'Ночная' : ''),
+            report.manager || report['Руководитель']?.value || ''
         ];
+        
+        // Добавляем данные по категориям
+        PERSONNEL_CATEGORIES.forEach(cat => {
+            const catData = report[cat.name];
+            
+            if (cat.type === 'single' || cat.type === 'select') {
+                row.push(catData?.value || '');
+            } else if (cat.type === 'triple' || cat.type === 'quadruple') {
+                cat.fields.forEach(f => {
+                    row.push(catData?.[f.n] || '');
+                });
+            } else if (cat.type === 'number') {
+                const plan = parseFloat(catData?.plan) || 0;
+                const fact = parseFloat(catData?.fact) || 0;
+                row.push(plan, fact, fact - plan);
+            } else if (cat.type === 'text') {
+                row.push(catData?.value || catData?.text || '');
+            }
+        });
+        
+        return row;
     });
     
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     
     // Настройка ширины столбцов
-    worksheet['!cols'] = [
+    const colWidths = [
         { wch: 12 }, // Дата
-        { wch: 20 }, // Склад
+        { wch: 25 }, // Склад
         { wch: 10 }, // Смена
-        { wch: 25 }, // Руководитель
-        { wch: 15 }, // Штат (план)
-        { wch: 15 }, // Штат (факт)
-        { wch: 15 }, // Отклонение
-        { wch: 30 }  // Примечания
+        { wch: 30 }, // Руководитель
     ];
+    
+    // Добавляем ширины для категорий
+    PERSONNEL_CATEGORIES.forEach(cat => {
+        if (cat.type === 'single' || cat.type === 'select' || cat.type === 'text') {
+            colWidths.push({ wch: 20 });
+        } else if (cat.type === 'triple') {
+            cat.fields.forEach(() => colWidths.push({ wch: 12 }));
+        } else if (cat.type === 'quadruple') {
+            cat.fields.forEach(() => colWidths.push({ wch: 12 }));
+        } else if (cat.type === 'number') {
+            colWidths.push({ wch: 12 }, { wch: 12 }, { wch: 12 });
+        }
+    });
+    
+    worksheet['!cols'] = colWidths;
     
     return worksheet;
 }

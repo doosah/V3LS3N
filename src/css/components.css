@@ -21,6 +21,15 @@ h1 {
 h2 {
     color: #f0f4ff;
     text-shadow: 0 1px 5px rgba(102, 126, 234, 0.2);
+    margin-bottom: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+    text-align: center;
+    width: 100%;
+}
+
+/* В секциях */
+.section > h2:first-child {
+    margin-top: 0; /* Убрать отступ сверху для первого заголовка */
 }
 
 .subtitle {
@@ -44,6 +53,13 @@ h2 {
     }
 }
 
+@media (max-width: 480px) {
+    .subtitle-right {
+        font-size: clamp(10px, 2vw, 12px); /* Меньше текст */
+        line-height: 1.3;
+    }
+}
+
 .warehouse-btn {
     background: linear-gradient(135deg, rgba(45, 45, 45, 0.4) 0%, rgba(30, 58, 95, 0.3) 100%);
     border: 1px solid var(--brand-primary, #2d2d2d);
@@ -53,10 +69,10 @@ h2 {
     position: relative;
     overflow: hidden;
     padding: 16px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     text-align: center;
-    font-size: clamp(12px, 2.5vw, 13px);
+    font-size: var(--font-sm);
     font-weight: 500;
     min-height: var(--touch-target);
     word-break: break-word;
@@ -102,7 +118,7 @@ button {
     border-radius: var(--radius-md); /* Унифицированный */
     cursor: pointer;
     margin: 0 var(--spacing-sm) var(--spacing-md) 0; /* Система отступов */
-    font-size: clamp(14px, 3vw, 16px); /* Пропорциональный clamp */
+    font-size: var(--font-base);
     font-weight: 500;
     min-height: var(--touch-target);
     -webkit-tap-highlight-color: transparent;
@@ -158,7 +174,7 @@ button.secondary:hover {
 .large-button {
     width: 100%;
     padding: 18px 40px;
-    font-size: clamp(16px, 3.5vw, 18px); /* Пропорциональный clamp */
+    font-size: var(--font-md);
     font-weight: 600;
     min-height: 52px;
     margin-bottom: var(--spacing-md); /* Система отступов */
@@ -267,7 +283,13 @@ textarea:focus {
     margin: var(--spacing-md) 0;
     text-align: center;
     font-weight: 500;
-    font-size: clamp(14px, 3vw, 16px); /* Пропорциональный clamp */
+    font-size: var(--font-base);
+    transition: all 0.3s ease; /* Добавить transition */
+}
+
+.selected-date-display.updating {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(30, 58, 95, 0.6);
 }
 
 .delta-display {
@@ -282,7 +304,8 @@ textarea:focus {
 .summary-total {
     background: linear-gradient(135deg, var(--brand-primary, #2d2d2d) 0%, var(--brand-accent, #1e3a5f) 50%, var(--brand-secondary, #404040) 100%);
     background-size: 200% 200%;
-    animation: gradientFlow 8s ease infinite;
+    animation: gradientFlow 6s ease infinite; /* Ускорено до 6 секунд */
+    will-change: background-position; /* Оптимизация производительности */
     color: #ffffff;
     text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
     box-shadow: 0 8px 25px rgba(30, 58, 95, 0.5),
@@ -292,8 +315,15 @@ textarea:focus {
     padding: var(--spacing-xl);
     border-radius: var(--radius-lg); /* Унифицированный */
     text-align: center;
-    font-size: clamp(16px, 3.5vw, 18px); /* Пропорциональный clamp */
+    font-size: var(--font-md);
     font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .summary-total {
+        animation: none; /* Уважать настройки пользователя */
+        background-position: 0% 50%;
+    }
 }
 
 #console-output {
@@ -303,22 +333,23 @@ textarea:focus {
     transform: translateX(-50%);
     width: calc(100% - 20px);
     max-width: 600px;
-    border-radius: 12px 12px 0 0;
-    padding: 8px 16px;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    padding: var(--spacing-sm) var(--spacing-md);
     font-size: 11px;
     font-family: 'Courier New', monospace;
     z-index: 998;
     pointer-events: none;
-    max-height: 40px;
-    overflow: hidden;
+    max-height: 80px; /* Увеличено */
+    overflow-y: auto; /* Добавить scroll */
+    -webkit-overflow-scrolling: touch;
 }
 
 .category-input {
     margin-bottom: var(--spacing-xl);
     padding: var(--spacing-lg);
     border-radius: var(--radius-md); /* Унифицированный */
-    background: rgba(30, 58, 95, 0.35); /* Увеличен контраст для лучшей видимости */
-    border: 1px solid var(--brand-primary, #2d2d2d);
+    background: rgba(30, 58, 95, 0.45); /* Увеличено до 0.45 для лучшего контраста */
+    border: 2px solid var(--brand-accent, #1e3a5f); /* Утолщен border */
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2),
                 0 1px 0 rgba(255, 255, 255, 0.05);
 }
@@ -359,13 +390,15 @@ textarea:focus {
 
 .yesno-buttons {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    justify-content: center; /* Центрировать */
 }
 
 .yesno-btn {
-    flex: 1;
-    min-width: 80px; /* Минимальная ширина для предотвращения слишком узких кнопок */
+    flex: 0 1 auto; /* Не растягивать, но позволить shrink */
+    min-width: 100px;
+    max-width: 200px; /* Ограничить максимум */
     padding: var(--spacing-md) var(--spacing-xl);
     border-radius: var(--radius-md); /* Унифицированный */
     border: 1px solid rgba(135, 150, 200, 0.3);
@@ -411,8 +444,8 @@ textarea:focus {
     margin-right: var(--spacing-sm);
     margin-left: 0;
     padding: 0;
-    min-height: 20px;
-    min-width: 20px;
+    min-height: 24px; /* Увеличено для удобства */
+    min-width: 24px;
     cursor: pointer;
     accent-color: var(--brand-accent, #1e3a5f);
 }
@@ -423,5 +456,9 @@ textarea:focus {
     align-items: center;
     cursor: pointer;
     margin: 0;
-    font-size: clamp(14px, 3vw, 16px);
+    padding: var(--spacing-sm);
+    margin: calc(var(--spacing-sm) * -1); /* Компенсировать padding */
+    min-height: var(--touch-target); /* 44px - touch target */
+    gap: var(--spacing-sm);
+    font-size: var(--font-base);
 }
