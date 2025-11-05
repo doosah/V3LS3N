@@ -9,6 +9,8 @@ table {
     transform: scale(0.95);
     transform-origin: top left;
     width: calc(100% - (100% - 600px) * 0.05);
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 th, td {

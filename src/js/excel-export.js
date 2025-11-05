@@ -154,31 +154,46 @@ function createOperationalSheet(data, XLSX) {
         
         // Добавляем данные по категориям
         CATEGORIES.forEach(cat => {
+            // report[cat.name] может быть объектом {value, plan, fact} или просто объектом
             const catData = report[cat.name];
             
+            // Проверяем что catData существует
+            if (!catData || (typeof catData === 'object' && Object.keys(catData).length === 0)) {
+                // Пустые данные - добавляем пустые ячейки
+                if (cat.type === 'single' || cat.type === 'yesno' || cat.type === 'select') {
+                    row.push('');
+                } else if (cat.type === 'triple' || cat.type === 'double') {
+                    cat.fields.forEach(() => row.push(''));
+                } else if (cat.type === 'time' || cat.type === 'number') {
+                    row.push('', '', '');
+                }
+                return;
+            }
+            
             if (cat.type === 'single') {
-                row.push(catData?.value || '');
+                row.push(catData?.value || catData || '');
             } else if (cat.type === 'yesno') {
-                const val = catData?.value;
-                if (val === true || val === 'yes') {
+                const val = catData?.value !== undefined ? catData.value : catData;
+                if (val === true || val === 'yes' || val === 'Да') {
                     row.push('Да');
-                } else if (val === false || val === 'no') {
+                } else if (val === false || val === 'no' || val === 'Нет') {
                     row.push('Нет');
                 } else {
                     row.push('');
                 }
             } else if (cat.type === 'select') {
-                row.push(catData?.value || '');
+                row.push(catData?.value || catData || '');
             } else if (cat.type === 'triple' || cat.type === 'double') {
                 cat.fields.forEach(f => {
                     row.push(catData?.[f.n] || '');
                 });
             } else if (cat.type === 'time') {
-                row.push(catData?.plan || '', catData?.fact || '', '');
+                row.push(catData?.plan || '', catData?.fact || '', catData?.delta || '');
             } else if (cat.type === 'number') {
                 const plan = parseFloat(catData?.plan) || 0;
                 const fact = parseFloat(catData?.fact) || 0;
-                row.push(plan, fact, fact - plan);
+                const delta = fact - plan;
+                row.push(plan || '', fact || '', delta || '');
             }
         });
         
@@ -249,8 +264,21 @@ function createPersonnelSheet(data, XLSX) {
         PERSONNEL_CATEGORIES.forEach(cat => {
             const catData = report[cat.name];
             
+            // Проверяем что catData существует
+            if (!catData || (typeof catData === 'object' && Object.keys(catData).length === 0)) {
+                // Пустые данные - добавляем пустые ячейки
+                if (cat.type === 'single' || cat.type === 'select' || cat.type === 'text') {
+                    row.push('');
+                } else if (cat.type === 'triple' || cat.type === 'quadruple') {
+                    cat.fields.forEach(() => row.push(''));
+                } else if (cat.type === 'number') {
+                    row.push('', '', '');
+                }
+                return;
+            }
+            
             if (cat.type === 'single' || cat.type === 'select') {
-                row.push(catData?.value || '');
+                row.push(catData?.value || catData || '');
             } else if (cat.type === 'triple' || cat.type === 'quadruple') {
                 cat.fields.forEach(f => {
                     row.push(catData?.[f.n] || '');
@@ -258,9 +286,10 @@ function createPersonnelSheet(data, XLSX) {
             } else if (cat.type === 'number') {
                 const plan = parseFloat(catData?.plan) || 0;
                 const fact = parseFloat(catData?.fact) || 0;
-                row.push(plan, fact, fact - plan);
+                const delta = fact - plan;
+                row.push(plan || '', fact || '', delta || '');
             } else if (cat.type === 'text') {
-                row.push(catData?.value || catData?.text || '');
+                row.push(catData?.value || catData?.text || catData || '');
             }
         });
         

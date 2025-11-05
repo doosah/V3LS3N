@@ -132,9 +132,42 @@
     }
     .action-buttons {
         width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
     .action-buttons button {
         width: 100%;
+        margin: 0 0 var(--spacing-sm) 0;
+    }
+    
+    .main-logo-wrapper {
+        min-height: calc(100vh - 250px);
+        padding: var(--spacing-lg) var(--spacing-sm);
+        margin-top: var(--spacing-md);
+    }
+    
+    .large-button {
+        max-width: 100%;
+        margin: 0 auto var(--spacing-sm) auto;
+    }
+    
+    .warehouse-list {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+        padding: 0;
+    }
+    
+    .table-wrapper {
+        width: 100%;
+        margin: var(--spacing-sm) 0;
+        border-radius: var(--radius-sm);
+    }
+    
+    .filter-section,
+    .date-section {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
     }
 }
 
