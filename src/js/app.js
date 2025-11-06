@@ -760,7 +760,7 @@ function initUpdateBadge() {
     // Дата последнего обновления функционала
     // Обновляется при каждом функциональном деплое
     // Формат: DD.MM.YYYY HH:mm:ss
-    const lastUpdateDate = '06.11.2025 03:36:27';
+    const lastUpdateDate = '06.11.2025 03:39:20';
     
     // Форматируем текст плашки
     updateBadgeText.textContent = `Последнее обновление функционала ${lastUpdateDate}`;
