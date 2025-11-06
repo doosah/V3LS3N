@@ -53,25 +53,59 @@ try {
 
     # Step 2: Get latest changes from GitHub
     Write-Host "[4/6] Getting latest changes from GitHub..." -ForegroundColor Yellow
-    git fetch origin
+    $fetchOutput = git fetch origin 2>&1
     if ($LASTEXITCODE -ne 0) {
         Write-Host "WARNING: git fetch completed with error" -ForegroundColor Yellow
     }
     
     Write-Host "Trying pull with rebase..." -ForegroundColor Gray
-    git pull origin main --rebase 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "WARNING: Conflicts during rebase. Trying merge..." -ForegroundColor Yellow
+    try {
+        $pullOutput = git pull origin main --rebase 2>&1 | Out-String
+        $pullExitCode = $LASTEXITCODE
+        
+        if ($pullExitCode -ne 0) {
+            Write-Host "WARNING: Rebase failed" -ForegroundColor Yellow
+            Write-Host "Trying merge instead..." -ForegroundColor Yellow
+            
+            # Try to abort rebase if it's in progress
+            git rebase --abort 2>&1 | Out-Null
+            
+            # Try merge
+            $mergeOutput = git pull origin main --no-rebase 2>&1 | Out-String
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "ERROR: Could not get changes" -ForegroundColor Red
+                Write-Host "Try manually: git pull origin main" -ForegroundColor Yellow
+                Pop-Location
+                exit 1
+            }
+            Write-Host "OK: Changes merged successfully" -ForegroundColor Green
+        } else {
+            Write-Host "OK: Changes received" -ForegroundColor Green
+        }
+    } catch {
+        Write-Host "WARNING: Exception during pull: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host "Trying merge instead..." -ForegroundColor Yellow
+        
+        # Try to abort rebase if it's in progress
         git rebase --abort 2>&1 | Out-Null
-        git pull origin main --no-rebase 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "ERROR: Could not get changes" -ForegroundColor Red
+        
+        # Try merge
+        try {
+            git pull origin main --no-rebase 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "ERROR: Could not get changes" -ForegroundColor Red
+                Write-Host "Try manually: git pull origin main" -ForegroundColor Yellow
+                Pop-Location
+                exit 1
+            }
+            Write-Host "OK: Changes merged successfully" -ForegroundColor Green
+        } catch {
+            Write-Host "ERROR: Could not merge changes" -ForegroundColor Red
             Write-Host "Try manually: git pull origin main" -ForegroundColor Yellow
             Pop-Location
             exit 1
         }
     }
-    Write-Host "OK: Changes received" -ForegroundColor Green
     Write-Host ""
 
     # Step 3: Push to GitHub
