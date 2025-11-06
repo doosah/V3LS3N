@@ -683,25 +683,64 @@ async function performExport() {
     }
 }
 
-// Экспорт функций экспорта в window (добавляем после определения функций)
-window.showExportSection = showExportSection;
-window.performExport = performExport;
-
-// Функция для получения chat_id (для настройки)
-window.getTelegramChatId = async function() {
-    const chatId = await getChatId();
-    if (chatId) {
-        alert(`Chat ID найден: ${chatId}\n\nДобавьте его в src/js/telegram-config.js:\nCHAT_ID: '${chatId}'`);
-        console.log('Chat ID:', chatId);
-        return chatId;
-    } else {
-        alert('Chat ID не найден. Отправьте боту сообщение и повторите попытку.');
-        return null;
-    }
-};
+// ============================================
+// ЭКСПОРТ ВСЕХ ФУНКЦИЙ В WINDOW ДЛЯ INLINE HANDLERS
+// ВАЖНО: Выполняется сразу после определения всех функций, ДО DOMContentLoaded
+// ============================================
+try {
+    // Экспортируем функции немедленно для доступности из inline handlers
+    window.selectReport = selectReport;
+    window.backToMain = backToMain;
+    window.prevPeriod = prevPeriod;
+    window.nextPeriod = nextPeriod;
+    window.toggleCalendarView = toggleCalendarView;
+    window.prevPeriodPersonnel = prevPeriodPersonnel;
+    window.nextPeriodPersonnel = nextPeriodPersonnel;
+    window.toggleCalendarViewPersonnel = toggleCalendarViewPersonnel;
+    window.saveWarehouseReport = saveWarehouseReport;
+    window.savePersonnelReport = savePersonnelReport;
+    window.selectYesNo = selectYesNo;
+    window.updateSummaryTable = updateSummaryTable;
+    window.showSummaryData = showSummaryData;
+    window.showSummarySection = showSummarySection;
+    window.prevPeriodSummary = prevPeriodSummary;
+    window.nextPeriodSummary = nextPeriodSummary;
+    window.toggleCalendarViewSummary = toggleCalendarViewSummary;
+    window.prevSummaryDay = prevSummaryDay;
+    window.nextSummaryDay = nextSummaryDay;
+    window.toggleFullScreen = toggleFullScreen;
+    window.updatePersonnelSummaryTable = updatePersonnelSummaryTable;
+    window.showPersonnelSummaryData = showPersonnelSummaryData;
+    window.showPersonnelSummarySection = showPersonnelSummarySection;
+    window.prevPeriodPersonnelSummary = prevPeriodPersonnelSummary;
+    window.nextPeriodPersonnelSummary = nextPeriodPersonnelSummary;
+    window.toggleCalendarViewPersonnelSummary = toggleCalendarViewPersonnelSummary;
+    window.prevPersonnelSummaryDay = prevPersonnelSummaryDay;
+    window.nextPersonnelSummaryDay = nextPersonnelSummaryDay;
+    window.togglePersonnelFullScreen = togglePersonnelFullScreen;
+    window.showExportSection = showExportSection;
+    window.performExport = performExport;
+    
+    // Функция для получения chat_id (для настройки)
+    window.getTelegramChatId = async function() {
+        const chatId = await getChatId();
+        if (chatId) {
+            alert(`Chat ID найден: ${chatId}\n\nДобавьте его в src/js/telegram-config.js:\nCHAT_ID: '${chatId}'`);
+            console.log('Chat ID:', chatId);
+            return chatId;
+        } else {
+            alert('Chat ID не найден. Отправьте боту сообщение и повторите попытку.');
+            return null;
+        }
+    };
+    
+    console.log('✅ Все функции экспортированы в window');
+} catch (error) {
+    console.error('❌ Ошибка экспорта функций в window:', error);
+}
 
 // Инициализация
-window.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
     try {
         // Инициализируем Supabase после загрузки CDN скрипта
         initSupabase();
@@ -766,47 +805,4 @@ function initUpdateBadge() {
     updateBadgeText.textContent = `Последнее обновление функционала ${lastUpdateDate}`;
     
     console.log('✅ Плашка обновления инициализирована:', lastUpdateDate);
-}
-
-// ============================================
-// ЭКСПОРТ ВСЕХ ФУНКЦИЙ В WINDOW ДЛЯ INLINE HANDLERS
-// ВАЖНО: Выполняется после определения всех функций
-// ============================================
-try {
-    // Экспортируем функции немедленно для доступности из inline handlers
-    window.selectReport = selectReport;
-    window.backToMain = backToMain;
-    window.prevPeriod = prevPeriod;
-    window.nextPeriod = nextPeriod;
-    window.toggleCalendarView = toggleCalendarView;
-    window.prevPeriodPersonnel = prevPeriodPersonnel;
-    window.nextPeriodPersonnel = nextPeriodPersonnel;
-    window.toggleCalendarViewPersonnel = toggleCalendarViewPersonnel;
-    window.saveWarehouseReport = saveWarehouseReport;
-    window.savePersonnelReport = savePersonnelReport;
-    window.selectYesNo = selectYesNo;
-    window.updateSummaryTable = updateSummaryTable;
-    window.showSummaryData = showSummaryData;
-    window.showSummarySection = showSummarySection;
-    window.prevPeriodSummary = prevPeriodSummary;
-    window.nextPeriodSummary = nextPeriodSummary;
-    window.toggleCalendarViewSummary = toggleCalendarViewSummary;
-    window.prevSummaryDay = prevSummaryDay;
-    window.nextSummaryDay = nextSummaryDay;
-    window.toggleFullScreen = toggleFullScreen;
-    window.updatePersonnelSummaryTable = updatePersonnelSummaryTable;
-    window.showPersonnelSummaryData = showPersonnelSummaryData;
-    window.showPersonnelSummarySection = showPersonnelSummarySection;
-    window.prevPeriodPersonnelSummary = prevPeriodPersonnelSummary;
-    window.nextPeriodPersonnelSummary = nextPeriodPersonnelSummary;
-    window.toggleCalendarViewPersonnelSummary = toggleCalendarViewPersonnelSummary;
-    window.prevPersonnelSummaryDay = prevPersonnelSummaryDay;
-    window.nextPersonnelSummaryDay = nextPersonnelSummaryDay;
-    window.togglePersonnelFullScreen = togglePersonnelFullScreen;
-    window.showExportSection = showExportSection;
-    window.performExport = performExport;
-    
-    console.log('✅ Все функции экспортированы в window');
-} catch (error) {
-    console.error('❌ Ошибка экспорта функций в window:', error);
 }
