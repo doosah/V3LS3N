@@ -1,49 +1,110 @@
-# Check Railway status
-$OutputEncoding = [System.Text.Encoding]::UTF8
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+# PowerShell script to monitor Railway deployment status
+$ErrorActionPreference = "Stop"
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Checking Railway Status" -ForegroundColor Cyan
+Write-Host "  RAILWAY DEPLOYMENT STATUS CHECK" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Checking Railway services..." -ForegroundColor Yellow
+Write-Host ""
+
+$services = @(
+    @{Name="telegram-scheduler"; URL="https://telegram-scheduler-production.up.railway.app"; Expected=200},
+    @{Name="stunning-manifestation"; URL="https://stunning-manifestation-production.up.railway.app"; Expected=200}
+)
+
+$results = @()
+
+foreach ($service in $services) {
+    Write-Host "Checking: $($service.Name)..." -ForegroundColor Gray
+    
+    try {
+        $response = Invoke-WebRequest -Uri "$($service.URL)/health" -Method GET -TimeoutSec 10 -ErrorAction Stop
+        
+        if ($response.StatusCode -eq 200) {
+            $status = "RUNNING"
+            $statusColor = "Green"
+            $details = $response.Content
+        } else {
+            $status = "ERROR_HTTP_$($response.StatusCode)"
+            $statusColor = "Yellow"
+            $details = "HTTP $($response.StatusCode)"
+        }
+        
+        Write-Host "  Status: $status" -ForegroundColor $statusColor
+        Write-Host "  Details: $details" -ForegroundColor Gray
+        
+        $results += @{
+            Name = $service.Name
+            Status = $status
+            URL = $service.URL
+            Details = $details
+        }
+        
+    } catch {
+        $statusCode = $_.Exception.Response.StatusCode.value__
+        
+        if ($statusCode) {
+            $status = "HTTP_$statusCode"
+            $statusColor = "Red"
+            $details = "HTTP $statusCode - Service exists but not responding correctly"
+        } else {
+            $status = "NOT_RESPONDING"
+            $statusColor = "Yellow"
+            $details = "Service not responding (may be deploying or down)"
+        }
+        
+        Write-Host "  Status: $status" -ForegroundColor $statusColor
+        Write-Host "  Details: $details" -ForegroundColor Gray
+        
+        $results += @{
+            Name = $service.Name
+            Status = $status
+            URL = $service.URL
+            Details = $details
+        }
+    }
+    
+    Write-Host ""
+}
+
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "  SUMMARY" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-$url = "https://telegram-scheduler-production.up.railway.app"
-
-Write-Host "1. Checking Health Endpoint..." -ForegroundColor Yellow
-Write-Host "   URL: $url/health" -ForegroundColor Cyan
-Write-Host ""
-
-try {
-    $response = Invoke-RestMethod -Uri "$url/health" -Method Get -ErrorAction Stop
-    Write-Host "SUCCESS! Server is running!" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Response:" -ForegroundColor Cyan
-    $response | ConvertTo-Json -Depth 10
-    Write-Host ""
-} catch {
-    Write-Host "ERROR: Health check failed" -ForegroundColor Red
-    Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Server may still be starting. Wait 1-2 minutes and try again." -ForegroundColor Yellow
+$allRunning = $true
+foreach ($result in $results) {
+    if ($result.Status -eq "RUNNING") {
+        Write-Host "  OK: $($result.Name) is running" -ForegroundColor Green
+    } else {
+        Write-Host "  ISSUE: $($result.Name) - $($result.Status)" -ForegroundColor Yellow
+        $allRunning = $false
+    }
 }
 
 Write-Host ""
-Write-Host "2. Checking Railway Logs..." -ForegroundColor Yellow
-Write-Host ""
-railway logs --tail 20
+
+if ($allRunning) {
+    Write-Host "SUCCESS: All services are running!" -ForegroundColor Green
+} else {
+    Write-Host "Some services need attention:" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "For stunning-manifestation:" -ForegroundColor Cyan
+    Write-Host "1. Check Railway Dashboard:" -ForegroundColor White
+    Write-Host "   https://railway.app" -ForegroundColor Gray
+    Write-Host "2. Find project 'stunning-manifestation'" -ForegroundColor White
+    Write-Host "3. Go to Deployments > View logs" -ForegroundColor White
+    Write-Host "4. Look for build or runtime errors" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Common issues:" -ForegroundColor Cyan
+    Write-Host "  - Missing environment variables" -ForegroundColor Gray
+    Write-Host "  - Wrong Root Directory (should be empty)" -ForegroundColor Gray
+    Write-Host "  - Wrong Start Command (should be 'node server.js')" -ForegroundColor Gray
+    Write-Host "  - Build errors (check logs)" -ForegroundColor Gray
+}
 
 Write-Host ""
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "What to look for:" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "To check again, run:" -ForegroundColor Cyan
+Write-Host "  .\CHECK-RAILWAY-PROJECTS.ps1" -ForegroundColor White
 Write-Host ""
-Write-Host "SUCCESS if you see:" -ForegroundColor Green
-Write-Host "  Telegram Bot Scheduler запущен" -ForegroundColor White
-Write-Host "  Сервер запущен на порту 3000" -ForegroundColor White
-Write-Host ""
-Write-Host "ERROR if you see:" -ForegroundColor Red
-Write-Host "  SyntaxError: Unexpected token" -ForegroundColor White
-Write-Host "  /app/index.html" -ForegroundColor White
-Write-Host ""
-
-Read-Host "Press Enter to exit"
