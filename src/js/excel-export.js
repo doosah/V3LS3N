@@ -212,6 +212,7 @@ function extractCategoryValue(catData, catType) {
 
 /**
  * Безопасное преобразование значения в строку для Excel
+ * Обрабатывает все типы данных и правильно извлекает значения из объектов
  */
 function safeStringify(value) {
     if (value === null || value === undefined) return '';
@@ -224,19 +225,46 @@ function safeStringify(value) {
     // Если это объект, пробуем извлечь значение
     if (typeof value === 'object' && !Array.isArray(value)) {
         // Если в объекте есть поле value, используем его
-        if (value.value !== undefined) {
+        if (value.value !== undefined && value.value !== null) {
             return String(value.value);
         }
+        
+        // Если это объект с полями plan, fact, delta - обрабатываем отдельно
+        if (value.plan !== undefined || value.fact !== undefined || value.delta !== undefined) {
+            // Это уже обработано в вызывающем коде, возвращаем пустую строку
+            return '';
+        }
+        
+        // Если это объект с полями для triple/double категорий (например, {FBS: 10, 'X-Dock': 5})
+        const keys = Object.keys(value);
+        if (keys.length > 0) {
+            // Проверяем, есть ли хотя бы одно примитивное значение
+            for (const key of keys) {
+                const val = value[key];
+                if (val !== null && val !== undefined && typeof val !== 'object') {
+                    // Нашли примитивное значение, но это не то что нам нужно для экспорта
+                    // Возвращаем пустую строку, так как это обработается в вызывающем коде
+                    return '';
+                }
+            }
+        }
+        
         // Если это обычный объект без value, возвращаем пустую строку
         if (Object.keys(value).length === 0) {
             return '';
         }
+        
         // Пробуем найти первое примитивное значение
         for (const key in value) {
             if (value[key] !== null && value[key] !== undefined && typeof value[key] !== 'object') {
                 return String(value[key]);
             }
         }
+        return '';
+    }
+    
+    // Если это массив, возвращаем пустую строку (не экспортируем массивы)
+    if (Array.isArray(value)) {
         return '';
     }
     

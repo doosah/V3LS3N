@@ -690,6 +690,21 @@ async function performExport() {
     
     console.log(`📊 Всего собрано записей для экспорта: ${allData.length}`);
     
+    // Детальное логирование первых нескольких записей для отладки
+    if (allData.length > 0) {
+        console.log('📊 Пример первой записи для экспорта:', JSON.stringify(allData[0], null, 2));
+        console.log('📊 Ключи первой записи:', Object.keys(allData[0]));
+        
+        // Проверяем первую запись на проблемные данные
+        const firstRecord = allData[0];
+        Object.keys(firstRecord).forEach(key => {
+            const value = firstRecord[key];
+            if (value && typeof value === 'object' && !Array.isArray(value)) {
+                console.log(`  - ${key}:`, typeof value, 'keys:', Object.keys(value));
+            }
+        });
+    }
+    
     try {
         await exportToExcel(allData, filters);
         alert('✅ Экспорт выполнен успешно!');
