@@ -290,7 +290,7 @@
         
         <!-- Плашка с информацией о последнем обновлении -->
         <div id="updateBadge" class="update-badge">
-            <span id="updateBadgeText">Последнее обновление функционала 06.11.2025 03:39:20</span>
+            <span id="updateBadgeText">Последнее обновление функционала 06.11.2025 03:36:27</span>
         </div>
     </div>
 
@@ -302,16 +302,31 @@
     
     <!-- Проверка загрузки модулей -->
     <script>
+        // Обработка ошибок при загрузке модулей
+        window.addEventListener('error', function(e) {
+            console.error('❌ Ошибка загрузки:', e.filename, e.message, e.lineno);
+            if (e.filename && e.filename.includes('app.js')) {
+                alert('Ошибка загрузки приложения! Проверьте консоль браузера (F12)');
+            }
+        }, true);
+        
         // Проверяем что функции доступны через небольшую задержку
         window.addEventListener('load', function() {
             setTimeout(function() {
-                if (typeof window.selectReport !== 'function') {
-                    console.error('❌ ОШИБКА: Функция selectReport не загружена!');
-                    console.error('Проверьте консоль на наличие ошибок модулей');
+                const requiredFunctions = ['selectReport', 'backToMain', 'showExportSection'];
+                const missingFunctions = requiredFunctions.filter(fn => typeof window[fn] !== 'function');
+                
+                if (missingFunctions.length > 0) {
+                    console.error('❌ ОШИБКА: Не загружены функции:', missingFunctions);
+                    console.error('Возможные причины:');
+                    console.error('1. Ошибка в модуле app.js');
+                    console.error('2. Ошибка импорта зависимостей');
+                    console.error('3. Проверьте консоль на наличие ошибок загрузки модулей');
+                    alert('Ошибка загрузки функций! Проверьте консоль браузера (F12)');
                 } else {
-                    console.log('✅ Функции загружены успешно');
+                    console.log('✅ Все функции загружены успешно');
                 }
-            }, 1000);
+            }, 2000);
         });
     </script>
     

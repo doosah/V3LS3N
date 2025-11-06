@@ -2,33 +2,19 @@
 
 import { TELEGRAM_CONFIG, RESPONSIBLE_PERSONS } from './telegram-config.js';
 
-const BOT_API_URL = `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}`;
+// В клиентском коде токен не используется напрямую
+// Все функции Telegram работают только на сервере
+const BOT_API_URL = `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN || ''}`;
 
 /**
  * Получение chat_id (для настройки)
  * Отправьте боту любое сообщение, затем вызовите эту функцию
  */
 export async function getChatId() {
-    try {
-        const response = await fetch(`${BOT_API_URL}/getUpdates`);
-        const data = await response.json();
-        
-        if (data.ok && data.result.length > 0) {
-            const lastUpdate = data.result[data.result.length - 1];
-            const chatId = lastUpdate.message?.chat?.id || lastUpdate.channel_post?.chat?.id;
-            
-            if (chatId) {
-                console.log('Chat ID найден:', chatId);
-                return chatId.toString();
-            }
-        }
-        
-        console.log('Chat ID не найден. Отправьте боту сообщение и повторите попытку.');
-        return null;
-    } catch (error) {
-        console.error('Ошибка получения chat_id:', error);
-        return null;
-    }
+    // В клиентском коде эта функция не должна использоваться
+    // Токен бота доступен только на сервере
+    console.warn('getChatId вызывается в клиентском коде, но токен бота доступен только на сервере');
+    return null;
 }
 
 /**
