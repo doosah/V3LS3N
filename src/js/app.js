@@ -569,7 +569,16 @@ async function performExport() {
                                 Object.keys(reportData).forEach(categoryName => {
                                     let categoryValue = reportData[categoryName];
                                     
-                                    // Проверяем на проблемные данные
+                                    // Логируем проблемные данные для отладки
+                                    if (categoryValue && typeof categoryValue === 'object' && categoryValue.toString && categoryValue.toString() === '[object Object]') {
+                                        console.warn(`⚠️ Найден объект без правильной сериализации:`, {
+                                            date, warehouse, shiftType, categoryName,
+                                            value: categoryValue,
+                                            keys: Object.keys(categoryValue)
+                                        });
+                                    }
+                                    
+                                    // Проверяем на проблемные данные (строки)
                                     if (categoryValue && typeof categoryValue === 'string' && categoryValue === '[object Object]') {
                                         console.warn(`⚠️ Найдена строка "[object Object]" в операционном отчете:`, {
                                             date, warehouse, shiftType, categoryName
@@ -583,6 +592,14 @@ async function performExport() {
                                             categoryValue = JSON.parse(categoryValue);
                                         } catch (e) {
                                             // Если не JSON, оставляем как строку
+                                        }
+                                    }
+                                    
+                                    // Если это объект, убеждаемся что он правильно структурирован
+                                    if (categoryValue && typeof categoryValue === 'object' && !Array.isArray(categoryValue)) {
+                                        // Проверяем, что это не просто пустой объект
+                                        if (Object.keys(categoryValue).length === 0) {
+                                            categoryValue = null;
                                         }
                                     }
                                     
@@ -624,7 +641,16 @@ async function performExport() {
                                 Object.keys(reportData).forEach(categoryName => {
                                     let categoryValue = reportData[categoryName];
                                     
-                                    // Проверяем на проблемные данные
+                                    // Логируем проблемные данные для отладки
+                                    if (categoryValue && typeof categoryValue === 'object' && categoryValue.toString && categoryValue.toString() === '[object Object]') {
+                                        console.warn(`⚠️ Найден объект без правильной сериализации:`, {
+                                            date, warehouse, shiftType, categoryName,
+                                            value: categoryValue,
+                                            keys: Object.keys(categoryValue)
+                                        });
+                                    }
+                                    
+                                    // Проверяем на проблемные данные (строки)
                                     if (categoryValue && typeof categoryValue === 'string' && categoryValue === '[object Object]') {
                                         console.warn(`⚠️ Найдена строка "[object Object]" в операционном отчете:`, {
                                             date, warehouse, shiftType, categoryName
@@ -638,6 +664,14 @@ async function performExport() {
                                             categoryValue = JSON.parse(categoryValue);
                                         } catch (e) {
                                             // Если не JSON, оставляем как строку
+                                        }
+                                    }
+                                    
+                                    // Если это объект, убеждаемся что он правильно структурирован
+                                    if (categoryValue && typeof categoryValue === 'object' && !Array.isArray(categoryValue)) {
+                                        // Проверяем, что это не просто пустой объект
+                                        if (Object.keys(categoryValue).length === 0) {
+                                            categoryValue = null;
                                         }
                                     }
                                     
@@ -713,6 +747,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 /**
  * Инициализация плашки с информацией о последнем обновлении
+ * Дата обновляется автоматически при каждом коммите через git commit date
  */
 function initUpdateBadge() {
     const updateBadge = document.getElementById('updateBadge');
@@ -720,12 +755,13 @@ function initUpdateBadge() {
     
     if (!updateBadge || !updateBadgeText) return;
     
-    // Дата последнего обновления (обновляется при деплое)
+    // Дата последнего обновления функционала
+    // Обновляется при каждом функциональном деплое
     // Формат: DD.MM.YYYY HH:mm:ss
     const lastUpdateDate = '06.11.2025 03:22:21';
     
     // Форматируем текст плашки
     updateBadgeText.textContent = `Последнее обновление функционала ${lastUpdateDate}`;
     
-    console.log('✅ Плашка обновления инициализирована');
+    console.log('✅ Плашка обновления инициализирована:', lastUpdateDate);
 }
