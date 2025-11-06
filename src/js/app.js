@@ -567,7 +567,18 @@ async function performExport() {
                                 
                                 // Добавляем все категории
                                 Object.keys(reportData).forEach(categoryName => {
-                                    reportRecord[categoryName] = reportData[categoryName];
+                                    let categoryValue = reportData[categoryName];
+                                    
+                                    // Если значение - строка, пробуем распарсить JSON
+                                    if (typeof categoryValue === 'string') {
+                                        try {
+                                            categoryValue = JSON.parse(categoryValue);
+                                        } catch (e) {
+                                            // Если не JSON, оставляем как строку
+                                        }
+                                    }
+                                    
+                                    reportRecord[categoryName] = categoryValue;
                                 });
                                 
                                 allData.push(reportRecord);
@@ -603,7 +614,18 @@ async function performExport() {
                                 
                                 // Добавляем все категории
                                 Object.keys(reportData).forEach(categoryName => {
-                                    reportRecord[categoryName] = reportData[categoryName];
+                                    let categoryValue = reportData[categoryName];
+                                    
+                                    // Если значение - строка, пробуем распарсить JSON
+                                    if (typeof categoryValue === 'string') {
+                                        try {
+                                            categoryValue = JSON.parse(categoryValue);
+                                        } catch (e) {
+                                            // Если не JSON, оставляем как строку
+                                        }
+                                    }
+                                    
+                                    reportRecord[categoryName] = categoryValue;
                                 });
                                 
                                 allData.push(reportRecord);

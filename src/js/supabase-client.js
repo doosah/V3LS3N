@@ -98,9 +98,24 @@ export async function loadFromSupabase(storeOperational, storePersonnel) {
         const { data: ops } = await supabase.from('operational_reports').select('*');
         if (ops && storeOperational) {
             ops.forEach(row => {
-                if (!storeOperational[row.report_date]) storeOperational[row.report_date] = {};
-                if (!storeOperational[row.report_date][row.warehouse]) storeOperational[row.report_date][row.warehouse] = {};
-                storeOperational[row.report_date][row.warehouse][row.shift_type] = row.data;
+                // Преобразуем дату из YYYY-MM-DD в DD.MM.YYYY для совместимости
+                const dateKey = row.report_date.split('-').reverse().join('.');
+                
+                if (!storeOperational[dateKey]) storeOperational[dateKey] = {};
+                if (!storeOperational[dateKey][row.warehouse]) storeOperational[dateKey][row.warehouse] = {};
+                
+                // Парсим данные, если они в виде строки
+                let rowData = row.data;
+                if (typeof rowData === 'string') {
+                    try {
+                        rowData = JSON.parse(rowData);
+                    } catch (e) {
+                        console.warn('Не удалось распарсить данные отчета:', e);
+                        rowData = {};
+                    }
+                }
+                
+                storeOperational[dateKey][row.warehouse][row.shift_type] = rowData || {};
             });
             localStorage.setItem('warehouseReports', JSON.stringify(storeOperational));
             console.log('Operational reports loaded');
@@ -109,9 +124,24 @@ export async function loadFromSupabase(storeOperational, storePersonnel) {
         const { data: pers } = await supabase.from('personnel_reports').select('*');
         if (pers && storePersonnel) {
             pers.forEach(row => {
-                if (!storePersonnel[row.report_date]) storePersonnel[row.report_date] = {};
-                if (!storePersonnel[row.report_date][row.warehouse]) storePersonnel[row.report_date][row.warehouse] = {};
-                storePersonnel[row.report_date][row.warehouse][row.shift_type] = row.data;
+                // Преобразуем дату из YYYY-MM-DD в DD.MM.YYYY для совместимости
+                const dateKey = row.report_date.split('-').reverse().join('.');
+                
+                if (!storePersonnel[dateKey]) storePersonnel[dateKey] = {};
+                if (!storePersonnel[dateKey][row.warehouse]) storePersonnel[dateKey][row.warehouse] = {};
+                
+                // Парсим данные, если они в виде строки
+                let rowData = row.data;
+                if (typeof rowData === 'string') {
+                    try {
+                        rowData = JSON.parse(rowData);
+                    } catch (e) {
+                        console.warn('Не удалось распарсить данные отчета:', e);
+                        rowData = {};
+                    }
+                }
+                
+                storePersonnel[dateKey][row.warehouse][row.shift_type] = rowData || {};
             });
             localStorage.setItem('personnelReports', JSON.stringify(storePersonnel));
             console.log('Personnel reports loaded');

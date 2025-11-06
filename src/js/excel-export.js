@@ -64,7 +64,16 @@ export async function exportToExcel(data, filters = {}) {
         
         // Сохранение файла
         const fileName = generateFileName(filters);
-        XLSX.writeFile(wb, fileName);
+        
+        // Настройка опций для правильной кодировки UTF-8
+        const writeOptions = {
+            type: 'binary',
+            bookType: 'xlsx',
+            cellStyles: true,
+            bookSST: false
+        };
+        
+        XLSX.writeFile(wb, fileName, writeOptions);
         
         console.log('✅ Excel файл сохранен:', fileName);
         return true;
@@ -119,6 +128,67 @@ function filterData(data, filters) {
 }
 
 /**
+ * Преобразование даты из YYYY-MM-DD в DD.MM.YYYY
+ */
+function formatDateForExport(dateStr) {
+    if (!dateStr) return '';
+    
+    // Если дата уже в формате DD.MM.YYYY, возвращаем как есть
+    if (/^\d{2}\.\d{2}\.\d{4}$/.test(dateStr)) {
+        return dateStr;
+    }
+    
+    // Преобразуем из YYYY-MM-DD в DD.MM.YYYY
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        const parts = dateStr.split('-');
+        return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    }
+    
+    return dateStr;
+}
+
+/**
+ * Извлечение значения из объекта категории с обработкой разных форматов
+ */
+function extractCategoryValue(catData, catType) {
+    if (!catData) return null;
+    
+    // Если данные - строка, пробуем распарсить JSON
+    if (typeof catData === 'string') {
+        try {
+            catData = JSON.parse(catData);
+        } catch (e) {
+            // Если не JSON, возвращаем как есть
+            return catData;
+        }
+    }
+    
+    // Если не объект, возвращаем как есть
+    if (typeof catData !== 'object' || catData === null) {
+        return catData;
+    }
+    
+    // Для разных типов категорий извлекаем значения по-разному
+    if (catType === 'single' || catType === 'select') {
+        return catData.value !== undefined ? catData.value : catData;
+    } else if (catType === 'yesno') {
+        const val = catData.value !== undefined ? catData.value : catData;
+        if (val === true || val === 'yes' || val === 'Да') return 'Да';
+        if (val === false || val === 'no' || val === 'Нет') return 'Нет';
+        return '';
+    } else if (catType === 'triple' || catType === 'double' || catType === 'quadruple') {
+        // Возвращаем объект как есть, его поля будут обработаны отдельно
+        return catData;
+    } else if (catType === 'time' || catType === 'number') {
+        return catData; // Возвращаем объект с plan, fact, delta
+    } else if (catType === 'text') {
+        return catData.value !== undefined ? catData.value : (catData.text !== undefined ? catData.text : catData);
+    }
+    
+    return catData;
+}
+
+/**
  * Создание листа для операционных отчетов
  */
 function createOperationalSheet(data, XLSX) {
@@ -145,20 +215,34 @@ function createOperationalSheet(data, XLSX) {
     
     // Преобразуем данные в строки
     const rows = data.map(report => {
+        // Форматируем дату
+        const formattedDate = formatDateForExport(report.date);
+        
+        // Извлекаем значение руководителя
+        let managerValue = '';
+        if (report.manager) {
+            managerValue = typeof report.manager === 'string' ? report.manager : report.manager;
+        } else if (report['Руководитель']) {
+            const managerData = extractCategoryValue(report['Руководитель'], 'select');
+            managerValue = typeof managerData === 'string' ? managerData : (managerData?.value || '');
+        }
+        
         const row = [
-            report.date || '',
+            formattedDate,
             report.warehouse || '',
             report.shiftType === 'day' ? 'Дневная' : (report.shiftType === 'night' ? 'Ночная' : ''),
-            report.manager || report['Руководитель']?.value || ''
+            managerValue
         ];
         
         // Добавляем данные по категориям
         CATEGORIES.forEach(cat => {
-            // report[cat.name] может быть объектом {value, plan, fact} или просто объектом
-            const catData = report[cat.name];
+            let catData = report[cat.name];
+            
+            // Извлекаем значение с правильной обработкой
+            catData = extractCategoryValue(catData, cat.type);
             
             // Проверяем что catData существует
-            if (!catData || (typeof catData === 'object' && Object.keys(catData).length === 0)) {
+            if (!catData || (typeof catData === 'object' && Object.keys(catData).length === 0 && !Array.isArray(catData))) {
                 // Пустые данные - добавляем пустые ячейки
                 if (cat.type === 'single' || cat.type === 'yesno' || cat.type === 'select') {
                     row.push('');
@@ -171,9 +255,10 @@ function createOperationalSheet(data, XLSX) {
             }
             
             if (cat.type === 'single') {
-                row.push(catData?.value || catData || '');
+                const value = typeof catData === 'object' ? (catData.value !== undefined ? catData.value : '') : catData;
+                row.push(String(value || ''));
             } else if (cat.type === 'yesno') {
-                const val = catData?.value !== undefined ? catData.value : catData;
+                const val = typeof catData === 'object' ? (catData.value !== undefined ? catData.value : catData) : catData;
                 if (val === true || val === 'yes' || val === 'Да') {
                     row.push('Да');
                 } else if (val === false || val === 'no' || val === 'Нет') {
@@ -182,18 +267,28 @@ function createOperationalSheet(data, XLSX) {
                     row.push('');
                 }
             } else if (cat.type === 'select') {
-                row.push(catData?.value || catData || '');
+                const value = typeof catData === 'object' ? (catData.value !== undefined ? catData.value : '') : catData;
+                row.push(String(value || ''));
             } else if (cat.type === 'triple' || cat.type === 'double') {
-                cat.fields.forEach(f => {
-                    row.push(catData?.[f.n] || '');
-                });
+                // Проверяем, что catData - объект
+                if (typeof catData === 'object' && catData !== null) {
+                    cat.fields.forEach(f => {
+                        const fieldValue = catData[f.n] !== undefined ? catData[f.n] : '';
+                        row.push(String(fieldValue || ''));
+                    });
+                } else {
+                    cat.fields.forEach(() => row.push(''));
+                }
             } else if (cat.type === 'time') {
-                row.push(catData?.plan || '', catData?.fact || '', catData?.delta || '');
+                const plan = (typeof catData === 'object' && catData !== null) ? (catData.plan || '') : '';
+                const fact = (typeof catData === 'object' && catData !== null) ? (catData.fact || '') : '';
+                const delta = (typeof catData === 'object' && catData !== null) ? (catData.delta || '') : '';
+                row.push(String(plan), String(fact), String(delta));
             } else if (cat.type === 'number') {
-                const plan = parseFloat(catData?.plan) || 0;
-                const fact = parseFloat(catData?.fact) || 0;
+                const plan = (typeof catData === 'object' && catData !== null) ? (parseFloat(catData.plan) || 0) : 0;
+                const fact = (typeof catData === 'object' && catData !== null) ? (parseFloat(catData.fact) || 0) : 0;
                 const delta = fact - plan;
-                row.push(plan || '', fact || '', delta || '');
+                row.push(plan !== 0 ? plan : '', fact !== 0 ? fact : '', delta !== 0 ? delta : '');
             }
         });
         
@@ -253,19 +348,34 @@ function createPersonnelSheet(data, XLSX) {
     
     // Преобразуем данные в строки
     const rows = data.map(report => {
+        // Форматируем дату
+        const formattedDate = formatDateForExport(report.date);
+        
+        // Извлекаем значение руководителя
+        let managerValue = '';
+        if (report.manager) {
+            managerValue = typeof report.manager === 'string' ? report.manager : report.manager;
+        } else if (report['Руководитель']) {
+            const managerData = extractCategoryValue(report['Руководитель'], 'select');
+            managerValue = typeof managerData === 'string' ? managerData : (managerData?.value || '');
+        }
+        
         const row = [
-            report.date || '',
+            formattedDate,
             report.warehouse || '',
             report.shiftType === 'day' ? 'Дневная' : (report.shiftType === 'night' ? 'Ночная' : ''),
-            report.manager || report['Руководитель']?.value || ''
+            managerValue
         ];
         
         // Добавляем данные по категориям
         PERSONNEL_CATEGORIES.forEach(cat => {
-            const catData = report[cat.name];
+            let catData = report[cat.name];
+            
+            // Извлекаем значение с правильной обработкой
+            catData = extractCategoryValue(catData, cat.type);
             
             // Проверяем что catData существует
-            if (!catData || (typeof catData === 'object' && Object.keys(catData).length === 0)) {
+            if (!catData || (typeof catData === 'object' && Object.keys(catData).length === 0 && !Array.isArray(catData))) {
                 // Пустые данные - добавляем пустые ячейки
                 if (cat.type === 'single' || cat.type === 'select' || cat.type === 'text') {
                     row.push('');
@@ -278,18 +388,28 @@ function createPersonnelSheet(data, XLSX) {
             }
             
             if (cat.type === 'single' || cat.type === 'select') {
-                row.push(catData?.value || catData || '');
+                const value = typeof catData === 'object' ? (catData.value !== undefined ? catData.value : '') : catData;
+                row.push(String(value || ''));
             } else if (cat.type === 'triple' || cat.type === 'quadruple') {
-                cat.fields.forEach(f => {
-                    row.push(catData?.[f.n] || '');
-                });
+                // Проверяем, что catData - объект
+                if (typeof catData === 'object' && catData !== null) {
+                    cat.fields.forEach(f => {
+                        const fieldValue = catData[f.n] !== undefined ? catData[f.n] : '';
+                        row.push(String(fieldValue || ''));
+                    });
+                } else {
+                    cat.fields.forEach(() => row.push(''));
+                }
             } else if (cat.type === 'number') {
-                const plan = parseFloat(catData?.plan) || 0;
-                const fact = parseFloat(catData?.fact) || 0;
+                const plan = (typeof catData === 'object' && catData !== null) ? (parseFloat(catData.plan) || 0) : 0;
+                const fact = (typeof catData === 'object' && catData !== null) ? (parseFloat(catData.fact) || 0) : 0;
                 const delta = fact - plan;
-                row.push(plan || '', fact || '', delta || '');
+                row.push(plan !== 0 ? plan : '', fact !== 0 ? fact : '', delta !== 0 ? delta : '');
             } else if (cat.type === 'text') {
-                row.push(catData?.value || catData?.text || catData || '');
+                const value = typeof catData === 'object' ? 
+                    (catData.value !== undefined ? catData.value : (catData.text !== undefined ? catData.text : '')) : 
+                    catData;
+                row.push(String(value || ''));
             }
         });
         
