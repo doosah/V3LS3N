@@ -22,16 +22,49 @@ try {
     Write-Host "Current commit: $currentCommit" -ForegroundColor Gray
     Write-Host ""
     
-    # Create tag name with date
+    # Create tag name with date and time
     $date = Get-Date -Format "yyyy-MM-dd"
-    $tagName = "stable-$date"
+    $time = Get-Date -Format "HHmm"
     
-    Write-Host "Creating tag: $tagName" -ForegroundColor Yellow
+    # Check if tag already exists
+    $existingTags = git tag -l "stable-$date*"
+    if ($existingTags.Count -gt 0) {
+        Write-Host "Found existing tags for today:" -ForegroundColor Yellow
+        $existingTags | ForEach-Object { Write-Host "  - $_" -ForegroundColor Gray }
+        Write-Host ""
+        $tagName = "stable-$date-$time"
+        Write-Host "Creating new tag: $tagName" -ForegroundColor Yellow
+    } else {
+        $tagName = "stable-$date"
+        Write-Host "Creating tag: $tagName" -ForegroundColor Yellow
+    }
+    
     Write-Host "This will mark current version as stable backup" -ForegroundColor Gray
     Write-Host ""
     
     # Create annotated tag
-    $tagMessage = "Stable version backup - $date`n`nThis version is known to work correctly:`n- All features working`n- No delta calculation on load`n- Proper Supabase sync`n- GitHub Pages deployment working"
+    $tagMessage = "Stable version backup - $date`n`nThis version is known to work correctly:`n- All features working`n- No delta calculation on load`n- Proper Supabase sync`n- GitHub Pages deployment working`n- Clean codebase without temporary files`n- All Railway-related files removed`n- Only essential files remaining"
+    
+    # Check if tag already exists before creating
+    $tagExists = git tag -l $tagName
+    if ($tagExists) {
+        Write-Host "WARNING: Tag $tagName already exists!" -ForegroundColor Yellow
+        Write-Host "Options:" -ForegroundColor Yellow
+        Write-Host "  1. Delete existing tag and create new one" -ForegroundColor White
+        Write-Host "  2. Create tag with different name: stable-$date-$time" -ForegroundColor White
+        Write-Host ""
+        Write-Host "Enter choice (1 or 2):" -ForegroundColor Yellow
+        $choice = Read-Host
+        
+        if ($choice -eq "1") {
+            Write-Host "Deleting existing tag..." -ForegroundColor Yellow
+            git tag -d $tagName
+            git push origin :refs/tags/$tagName 2>&1 | Out-Null
+        } else {
+            $tagName = "stable-$date-$time"
+            Write-Host "Using new tag name: $tagName" -ForegroundColor Yellow
+        }
+    }
     
     git tag -a $tagName -m $tagMessage
     
