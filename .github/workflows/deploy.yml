@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -24,6 +24,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Update deployment date
+        run: |
+          # Получаем текущее время по московскому времени (UTC+3)
+          DEPLOY_DATE=$(TZ='Europe/Moscow' date '+%d.%m.%Y %H:%M:%S')
+          echo "Deployment date: $DEPLOY_DATE"
+          
+          # Обновляем дату в index.html
+          sed -i "s/Последнее обновление функционала [0-9]\{2\}\.[0-9]\{2\}\.[0-9]\{4\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}/Последнее обновление функционала $DEPLOY_DATE/g" index.html
+          
+          # Обновляем дату в src/js/app.js
+          sed -i "s/const lastUpdateDate = '[0-9]\{2\}\.[0-9]\{2\}\.[0-9]\{4\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}';/const lastUpdateDate = '$DEPLOY_DATE';/g" src/js/app.js
+          
+          # Проверяем результат
+          echo "Updated files:"
+          grep -n "Последнее обновление функционала" index.html
+          grep -n "lastUpdateDate" src/js/app.js
+      
+      - name: Commit updated date
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add index.html src/js/app.js
+          if ! git diff --staged --quiet; then
+            git commit -m "Auto-update deployment date [skip ci]"
+            git push
+          else
+            echo "No date changes to commit"
+          fi
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
