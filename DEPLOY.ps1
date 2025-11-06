@@ -40,7 +40,7 @@ try {
         Write-Host ""
         
         Write-Host "[3/6] Creating commit for local changes..." -ForegroundColor Yellow
-        $commitMessage = "Fix: Critical fixes for GitHub Pages`n`n- Removed process.env from telegram-config.js`n- Fixed addEventListener in app.js`n- Fixed template strings in components.js`n- Added check scripts"
+        $commitMessage = "Fix: Revert delta calculation changes and restore original functionality"
         
         git commit -m $commitMessage
         if ($LASTEXITCODE -ne 0) {
@@ -115,10 +115,10 @@ try {
     Write-Host "2. GitHub Pages deploys automatically via Actions" -ForegroundColor White
     Write-Host "3. Check in 1-2 minutes: https://doosah.github.io/V3LS3N/" -ForegroundColor White
     Write-Host ""
-    Write-Host "Check browser console (F12):" -ForegroundColor Yellow
+    Write-Host "Verify:" -ForegroundColor Yellow
     Write-Host "  - No 'process is not defined' errors" -ForegroundColor White
     Write-Host "  - No 'selectReport is not defined' errors" -ForegroundColor White
-    Write-Host "  - Should see 'All functions loaded successfully' message" -ForegroundColor White
+    Write-Host "  - Application loads and works correctly" -ForegroundColor White
     Write-Host ""
 
 } catch {
