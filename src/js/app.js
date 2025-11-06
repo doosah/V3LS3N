@@ -478,37 +478,6 @@ function backToMain() {
     selectedSummaryDate = null;
 }
 
-// Экспорт функций в window для inline handlers
-window.selectReport = selectReport;
-window.backToMain = backToMain;
-window.prevPeriod = prevPeriod;
-window.nextPeriod = nextPeriod;
-window.toggleCalendarView = toggleCalendarView;
-window.prevPeriodPersonnel = prevPeriodPersonnel;
-window.nextPeriodPersonnel = nextPeriodPersonnel;
-window.toggleCalendarViewPersonnel = toggleCalendarViewPersonnel;
-window.saveWarehouseReport = saveWarehouseReport;
-window.savePersonnelReport = savePersonnelReport;
-// selectYesNo уже экспортирован из forms.js и будет доступен через импорт
-window.selectYesNo = selectYesNo;
-window.updateSummaryTable = updateSummaryTable;
-window.showSummaryData = showSummaryData;
-window.showSummarySection = showSummarySection;
-window.prevPeriodSummary = prevPeriodSummary;
-window.nextPeriodSummary = nextPeriodSummary;
-window.toggleCalendarViewSummary = toggleCalendarViewSummary;
-window.prevSummaryDay = prevSummaryDay;
-window.nextSummaryDay = nextSummaryDay;
-window.toggleFullScreen = toggleFullScreen;
-window.updatePersonnelSummaryTable = updatePersonnelSummaryTable;
-window.showPersonnelSummaryData = showPersonnelSummaryData;
-window.showPersonnelSummarySection = showPersonnelSummarySection;
-window.prevPeriodPersonnelSummary = prevPeriodPersonnelSummary;
-window.nextPeriodPersonnelSummary = nextPeriodPersonnelSummary;
-window.toggleCalendarViewPersonnelSummary = toggleCalendarViewPersonnelSummary;
-window.prevPersonnelSummaryDay = prevPersonnelSummaryDay;
-window.nextPersonnelSummaryDay = nextPersonnelSummaryDay;
-window.togglePersonnelFullScreen = togglePersonnelFullScreen;
 
 // Функции экспорта
 function showExportSection() {
@@ -714,6 +683,7 @@ async function performExport() {
     }
 }
 
+// Экспорт функций экспорта в window (добавляем после определения функций)
 window.showExportSection = showExportSection;
 window.performExport = performExport;
 
@@ -732,32 +702,49 @@ window.getTelegramChatId = async function() {
 
 // Инициализация
 window.addEventListener('DOMContentLoaded', async () => {
-    // Инициализируем Supabase после загрузки CDN скрипта
-    initSupabase();
-    document.querySelectorAll('input[name="warehouseReportType"]').forEach(r => 
-        r.addEventListener('change', () => loadCategoryInputs(reports, currentWarehouse, selectedWarehouseDate, currentDate, warehouseCalendarView))
-    );
-    
-    document.querySelectorAll('input[name="personnelReportType"]').forEach(r => 
-        r.addEventListener('change', () => loadPersonnelCategoryInputs(personnelReports, currentPersonnelObj, selectedPersonnelDate))
-    );
+    try {
+        // Инициализируем Supabase после загрузки CDN скрипта
+        initSupabase();
+        document.querySelectorAll('input[name="warehouseReportType"]').forEach(r => 
+            r.addEventListener('change', () => loadCategoryInputs(reports, currentWarehouse, selectedWarehouseDate, currentDate, warehouseCalendarView))
+        );
+        
+        document.querySelectorAll('input[name="personnelReportType"]').forEach(r => 
+            r.addEventListener('change', () => loadPersonnelCategoryInputs(personnelReports, currentPersonnelObj, selectedPersonnelDate))
+        );
 
-    await loadFromSupabase(reports, personnelReports);
-    cleanOldReports(reports);
-    localStorage.setItem('warehouseReports', JSON.stringify(reports));
-    cleanOldPersonnelReports();
-    
-    generateWarehouseList();
-    generatePersonnelList();
-    renderWarehouseCalendar();
-    renderPersonnelCalendar();
-    renderSummaryCalendar();
-    renderPersonnelSummaryCalendar();
-    
-    setupRealtimeSubscriptions(() => loadFromSupabase(reports, personnelReports));
-    
-    // Инициализация плашки с информацией о последнем обновлении
-    initUpdateBadge();
+        // Загружаем данные из Supabase (не блокируем загрузку если ошибка)
+        try {
+            await loadFromSupabase(reports, personnelReports);
+        } catch (error) {
+            console.error('Ошибка загрузки из Supabase:', error);
+        }
+        
+        cleanOldReports(reports);
+        localStorage.setItem('warehouseReports', JSON.stringify(reports));
+        cleanOldPersonnelReports();
+        
+        generateWarehouseList();
+        generatePersonnelList();
+        renderWarehouseCalendar();
+        renderPersonnelCalendar();
+        renderSummaryCalendar();
+        renderPersonnelSummaryCalendar();
+        
+        try {
+            setupRealtimeSubscriptions(() => loadFromSupabase(reports, personnelReports));
+        } catch (error) {
+            console.error('Ошибка настройки realtime:', error);
+        }
+        
+        // Инициализация плашки с информацией о последнем обновлении
+        initUpdateBadge();
+        
+        console.log('✅ Приложение инициализировано успешно');
+    } catch (error) {
+        console.error('❌ Критическая ошибка инициализации:', error);
+        alert('Ошибка загрузки приложения. Пожалуйста, обновите страницу.');
+    }
 });
 
 /**
@@ -779,4 +766,47 @@ function initUpdateBadge() {
     updateBadgeText.textContent = `Последнее обновление функционала ${lastUpdateDate}`;
     
     console.log('✅ Плашка обновления инициализирована:', lastUpdateDate);
+}
+
+// ============================================
+// ЭКСПОРТ ВСЕХ ФУНКЦИЙ В WINDOW ДЛЯ INLINE HANDLERS
+// ВАЖНО: Выполняется после определения всех функций
+// ============================================
+try {
+    // Экспортируем функции немедленно для доступности из inline handlers
+    window.selectReport = selectReport;
+    window.backToMain = backToMain;
+    window.prevPeriod = prevPeriod;
+    window.nextPeriod = nextPeriod;
+    window.toggleCalendarView = toggleCalendarView;
+    window.prevPeriodPersonnel = prevPeriodPersonnel;
+    window.nextPeriodPersonnel = nextPeriodPersonnel;
+    window.toggleCalendarViewPersonnel = toggleCalendarViewPersonnel;
+    window.saveWarehouseReport = saveWarehouseReport;
+    window.savePersonnelReport = savePersonnelReport;
+    window.selectYesNo = selectYesNo;
+    window.updateSummaryTable = updateSummaryTable;
+    window.showSummaryData = showSummaryData;
+    window.showSummarySection = showSummarySection;
+    window.prevPeriodSummary = prevPeriodSummary;
+    window.nextPeriodSummary = nextPeriodSummary;
+    window.toggleCalendarViewSummary = toggleCalendarViewSummary;
+    window.prevSummaryDay = prevSummaryDay;
+    window.nextSummaryDay = nextSummaryDay;
+    window.toggleFullScreen = toggleFullScreen;
+    window.updatePersonnelSummaryTable = updatePersonnelSummaryTable;
+    window.showPersonnelSummaryData = showPersonnelSummaryData;
+    window.showPersonnelSummarySection = showPersonnelSummarySection;
+    window.prevPeriodPersonnelSummary = prevPeriodPersonnelSummary;
+    window.nextPeriodPersonnelSummary = nextPeriodPersonnelSummary;
+    window.toggleCalendarViewPersonnelSummary = toggleCalendarViewPersonnelSummary;
+    window.prevPersonnelSummaryDay = prevPersonnelSummaryDay;
+    window.nextPersonnelSummaryDay = nextPersonnelSummaryDay;
+    window.togglePersonnelFullScreen = togglePersonnelFullScreen;
+    window.showExportSection = showExportSection;
+    window.performExport = performExport;
+    
+    console.log('✅ Все функции экспортированы в window');
+} catch (error) {
+    console.error('❌ Ошибка экспорта функций в window:', error);
 }
