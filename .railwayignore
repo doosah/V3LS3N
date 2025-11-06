@@ -1,0 +1,17 @@
+# Railway ignore file
+# Исключаем веб-файлы из Railway деплоя
+src/
+img/
+index.html
+.github/
+*.bat
+*.ps1
+!telegram-bot/*.ps1
+START-SERVER.*
+CHECK.ps1
+DEPLOY.ps1
+CREATE-BACKUP-TAG.ps1
+RESTORE-FROM-BACKUP.ps1
+MERGE-*.md
+MERGE-*.txt
+

@@ -2,9 +2,8 @@
   - type: web
     name: telegram-scheduler
     env: node
-    rootDirectory: telegram-bot
     buildCommand: npm install
-    startCommand: node index.js
+    startCommand: node telegram-bot/index.js
     healthCheckPath: /health
     envVars:
       - key: TELEGRAM_BOT_TOKEN
