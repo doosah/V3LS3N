@@ -15,21 +15,79 @@ initSupabase();
 
 export { supabase, initSupabase };
 
+// Преобразование даты из DD.MM.YYYY в YYYY-MM-DD
+function convertDateToSupabaseFormat(date) {
+    // Если дата уже в формате YYYY-MM-DD, возвращаем как есть
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return date;
+    }
+    
+    // Преобразуем из DD.MM.YYYY в YYYY-MM-DD
+    if (/^\d{2}\.\d{2}\.\d{4}$/.test(date)) {
+        const parts = date.split('.');
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    
+    // Если формат не распознан, пробуем преобразовать через Date
+    try {
+        const dateObj = new Date(date);
+        if (!isNaN(dateObj.getTime())) {
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+    } catch (e) {
+        console.error('Ошибка преобразования даты:', e);
+    }
+    
+    // Если ничего не помогло, возвращаем исходную дату
+    console.warn('Не удалось преобразовать дату:', date);
+    return date;
+}
+
 // Синхронизация с Supabase
 export async function syncToSupabase(type, date, warehouse, shiftType, data) {
-    if (!supabase) return;
+    if (!supabase) {
+        console.warn('Supabase не инициализирован');
+        return;
+    }
+    
     try {
+        // Преобразуем дату в формат YYYY-MM-DD для Supabase
+        const supabaseDate = convertDateToSupabaseFormat(date);
+        
         const tableName = type === 'operational' ? 'operational_reports' : 'personnel_reports';
-        await supabase.from(tableName).upsert({
-            report_date: date,
+        
+        console.log(`Синхронизация ${type} отчета:`, {
+            date: date,
+            supabaseDate: supabaseDate,
+            warehouse: warehouse,
+            shiftType: shiftType,
+            dataKeys: Object.keys(data || {})
+        });
+        
+        const result = await supabase.from(tableName).upsert({
+            report_date: supabaseDate,
             warehouse: warehouse,
             shift_type: shiftType,
             data: data,
             updated_at: new Date().toISOString()
         }, { onConflict: 'report_date,warehouse,shift_type' });
-        console.log('✓ Синхронизировано с Supabase');
+        
+        if (result.error) {
+            console.error('Ошибка синхронизации:', result.error);
+            throw result.error;
+        }
+        
+        console.log('✓ Синхронизировано с Supabase:', {
+            date: supabaseDate,
+            warehouse: warehouse,
+            shiftType: shiftType
+        });
     } catch (error) {
         console.error('Ошибка синхронизации:', error);
+        throw error;
     }
 }
 
