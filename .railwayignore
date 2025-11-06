@@ -1,7 +1,0 @@
-index.html
-src/
-*.md
-!server/**/*.md
-.gitignore
-node_modules/
-
