@@ -300,6 +300,21 @@
     <!-- SheetJS для Excel экспорта -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.full.min.js"></script>
     
+    <!-- Проверка загрузки модулей -->
+    <script>
+        // Проверяем что функции доступны через небольшую задержку
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                if (typeof window.selectReport !== 'function') {
+                    console.error('❌ ОШИБКА: Функция selectReport не загружена!');
+                    console.error('Проверьте консоль на наличие ошибок модулей');
+                } else {
+                    console.log('✅ Функции загружены успешно');
+                }
+            }, 1000);
+        });
+    </script>
+    
     <!-- JavaScript Modules -->
     <script type="module" src="src/js/app.js"></script>
 </body>
