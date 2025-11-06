@@ -1,2 +1,2 @@
-web: node telegram-bot/index.js
+web: node server.js
 

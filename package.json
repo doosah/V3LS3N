@@ -4,8 +4,8 @@
   "description": "V3LS3N Web Application and Telegram Bot",
   "type": "module",
   "scripts": {
-    "start": "node telegram-bot/index.js",
-    "dev": "node --watch telegram-bot/index.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.79.0",
