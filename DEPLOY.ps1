@@ -67,7 +67,7 @@ try {
             Write-Host "WARNING: Rebase failed" -ForegroundColor Yellow
             Write-Host "Trying merge instead..." -ForegroundColor Yellow
             
-            # Try to abort rebase if it's in progress
+            # Try to abort rebase if it's in progress (ignore error if no rebase)
             git rebase --abort 2>&1 | Out-Null
             
             # Try merge
@@ -86,8 +86,10 @@ try {
         Write-Host "WARNING: Exception during pull: $($_.Exception.Message)" -ForegroundColor Yellow
         Write-Host "Trying merge instead..." -ForegroundColor Yellow
         
-        # Try to abort rebase if it's in progress
+        # Try to abort rebase if it's in progress (ignore error if no rebase)
+        $ErrorActionPreference = 'SilentlyContinue'
         git rebase --abort 2>&1 | Out-Null
+        $ErrorActionPreference = 'Stop'
         
         # Try merge
         try {
