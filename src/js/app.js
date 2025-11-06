@@ -569,8 +569,16 @@ async function performExport() {
                                 Object.keys(reportData).forEach(categoryName => {
                                     let categoryValue = reportData[categoryName];
                                     
+                                    // Проверяем на проблемные данные
+                                    if (categoryValue && typeof categoryValue === 'string' && categoryValue === '[object Object]') {
+                                        console.warn(`⚠️ Найдена строка "[object Object]" в операционном отчете:`, {
+                                            date, warehouse, shiftType, categoryName
+                                        });
+                                        categoryValue = null; // Удаляем проблемное значение
+                                    }
+                                    
                                     // Если значение - строка, пробуем распарсить JSON
-                                    if (typeof categoryValue === 'string') {
+                                    if (typeof categoryValue === 'string' && categoryValue !== '[object Object]') {
                                         try {
                                             categoryValue = JSON.parse(categoryValue);
                                         } catch (e) {
@@ -616,8 +624,16 @@ async function performExport() {
                                 Object.keys(reportData).forEach(categoryName => {
                                     let categoryValue = reportData[categoryName];
                                     
+                                    // Проверяем на проблемные данные
+                                    if (categoryValue && typeof categoryValue === 'string' && categoryValue === '[object Object]') {
+                                        console.warn(`⚠️ Найдена строка "[object Object]" в операционном отчете:`, {
+                                            date, warehouse, shiftType, categoryName
+                                        });
+                                        categoryValue = null; // Удаляем проблемное значение
+                                    }
+                                    
                                     // Если значение - строка, пробуем распарсить JSON
-                                    if (typeof categoryValue === 'string') {
+                                    if (typeof categoryValue === 'string' && categoryValue !== '[object Object]') {
                                         try {
                                             categoryValue = JSON.parse(categoryValue);
                                         } catch (e) {
@@ -690,4 +706,26 @@ window.addEventListener('DOMContentLoaded', async () => {
     renderPersonnelSummaryCalendar();
     
     setupRealtimeSubscriptions(() => loadFromSupabase(reports, personnelReports));
+    
+    // Инициализация плашки с информацией о последнем обновлении
+    initUpdateBadge();
 });
+
+/**
+ * Инициализация плашки с информацией о последнем обновлении
+ */
+function initUpdateBadge() {
+    const updateBadge = document.getElementById('updateBadge');
+    const updateBadgeText = document.getElementById('updateBadgeText');
+    
+    if (!updateBadge || !updateBadgeText) return;
+    
+    // Дата последнего обновления (обновляется при деплое)
+    // Формат: DD.MM.YYYY HH:mm:ss
+    const lastUpdateDate = '06.11.2025 03:22:21';
+    
+    // Форматируем текст плашки
+    updateBadgeText.textContent = `Последнее обновление функционала ${lastUpdateDate}`;
+    
+    console.log('✅ Плашка обновления инициализирована');
+}

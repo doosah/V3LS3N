@@ -8,12 +8,23 @@ import { WAREHOUSES, CATEGORIES, PERSONNEL_CATEGORIES } from './config.js';
 export async function exportToExcel(data, filters = {}) {
     // Используем библиотеку SheetJS (xlsx) через CDN
     try {
-        // Проверяем, загружена ли библиотека
-        if (!window.XLSX) {
-            throw new Error('XLSX library not loaded. Please include the script in index.html');
-        }
+        // Проверяем, загружена ли библиотека (ждем немного, если еще не загрузилась)
+        let XLSX = window.XLSX;
         
-        const XLSX = window.XLSX;
+        if (!XLSX) {
+            // Ждем до 3 секунд пока библиотека загрузится
+            for (let i = 0; i < 30; i++) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                if (window.XLSX) {
+                    XLSX = window.XLSX;
+                    break;
+                }
+            }
+            
+            if (!XLSX) {
+                throw new Error('XLSX library not loaded. Please check if the script is included in index.html');
+            }
+        }
         
         // Создание рабочей книги
         const wb = XLSX.utils.book_new();
@@ -73,6 +84,7 @@ export async function exportToExcel(data, filters = {}) {
             bookSST: false
         };
         
+        // Используем writeFile с опциями для правильной кодировки
         XLSX.writeFile(wb, fileName, writeOptions);
         
         console.log('✅ Excel файл сохранен:', fileName);
@@ -151,12 +163,17 @@ function formatDateForExport(dateStr) {
  * Извлечение значения из объекта категории с обработкой разных форматов
  */
 function extractCategoryValue(catData, catType) {
-    if (!catData) return null;
+    if (catData === null || catData === undefined) return null;
     
     // Если данные - строка, пробуем распарсить JSON
     if (typeof catData === 'string') {
+        // Если это строка "[object Object]", значит объект был неправильно сериализован
+        if (catData === '[object Object]') {
+            return null;
+        }
         try {
-            catData = JSON.parse(catData);
+            const parsed = JSON.parse(catData);
+            return parsed;
         } catch (e) {
             // Если не JSON, возвращаем как есть
             return catData;
@@ -164,7 +181,12 @@ function extractCategoryValue(catData, catType) {
     }
     
     // Если не объект, возвращаем как есть
-    if (typeof catData !== 'object' || catData === null) {
+    if (typeof catData !== 'object') {
+        return catData;
+    }
+    
+    // Если это массив, возвращаем как есть (будет обработан отдельно)
+    if (Array.isArray(catData)) {
         return catData;
     }
     
@@ -186,6 +208,39 @@ function extractCategoryValue(catData, catType) {
     }
     
     return catData;
+}
+
+/**
+ * Безопасное преобразование значения в строку для Excel
+ */
+function safeStringify(value) {
+    if (value === null || value === undefined) return '';
+    
+    // Если это строка "[object Object]", значит объект был неправильно сериализован
+    if (typeof value === 'string' && value === '[object Object]') {
+        return '';
+    }
+    
+    // Если это объект, пробуем извлечь значение
+    if (typeof value === 'object' && !Array.isArray(value)) {
+        // Если в объекте есть поле value, используем его
+        if (value.value !== undefined) {
+            return String(value.value);
+        }
+        // Если это обычный объект без value, возвращаем пустую строку
+        if (Object.keys(value).length === 0) {
+            return '';
+        }
+        // Пробуем найти первое примитивное значение
+        for (const key in value) {
+            if (value[key] !== null && value[key] !== undefined && typeof value[key] !== 'object') {
+                return String(value[key]);
+            }
+        }
+        return '';
+    }
+    
+    return String(value);
 }
 
 /**
@@ -238,6 +293,11 @@ function createOperationalSheet(data, XLSX) {
         CATEGORIES.forEach(cat => {
             let catData = report[cat.name];
             
+            // Логируем проблемные данные для отладки
+            if (catData && typeof catData === 'string' && catData === '[object Object]') {
+                console.warn(`⚠️ Найдена строка "[object Object]" для категории ${cat.name}:`, report);
+            }
+            
             // Извлекаем значение с правильной обработкой
             catData = extractCategoryValue(catData, cat.type);
             
@@ -256,39 +316,39 @@ function createOperationalSheet(data, XLSX) {
             
             if (cat.type === 'single') {
                 const value = typeof catData === 'object' ? (catData.value !== undefined ? catData.value : '') : catData;
-                row.push(String(value || ''));
+                row.push(safeStringify(value));
             } else if (cat.type === 'yesno') {
                 const val = typeof catData === 'object' ? (catData.value !== undefined ? catData.value : catData) : catData;
-                if (val === true || val === 'yes' || val === 'Да') {
+                if (val === true || val === 'yes' || val === 'Да' || val === true) {
                     row.push('Да');
-                } else if (val === false || val === 'no' || val === 'Нет') {
+                } else if (val === false || val === 'no' || val === 'Нет' || val === false) {
                     row.push('Нет');
                 } else {
                     row.push('');
                 }
             } else if (cat.type === 'select') {
                 const value = typeof catData === 'object' ? (catData.value !== undefined ? catData.value : '') : catData;
-                row.push(String(value || ''));
+                row.push(safeStringify(value));
             } else if (cat.type === 'triple' || cat.type === 'double') {
                 // Проверяем, что catData - объект
-                if (typeof catData === 'object' && catData !== null) {
+                if (typeof catData === 'object' && catData !== null && !Array.isArray(catData)) {
                     cat.fields.forEach(f => {
-                        const fieldValue = catData[f.n] !== undefined ? catData[f.n] : '';
-                        row.push(String(fieldValue || ''));
+                        const fieldValue = catData[f.n] !== undefined ? catData[f.n] : null;
+                        row.push(safeStringify(fieldValue));
                     });
                 } else {
                     cat.fields.forEach(() => row.push(''));
                 }
             } else if (cat.type === 'time') {
-                const plan = (typeof catData === 'object' && catData !== null) ? (catData.plan || '') : '';
-                const fact = (typeof catData === 'object' && catData !== null) ? (catData.fact || '') : '';
-                const delta = (typeof catData === 'object' && catData !== null) ? (catData.delta || '') : '';
-                row.push(String(plan), String(fact), String(delta));
+                const plan = (typeof catData === 'object' && catData !== null && !Array.isArray(catData)) ? (catData.plan || '') : '';
+                const fact = (typeof catData === 'object' && catData !== null && !Array.isArray(catData)) ? (catData.fact || '') : '';
+                const delta = (typeof catData === 'object' && catData !== null && !Array.isArray(catData)) ? (catData.delta || '') : '';
+                row.push(safeStringify(plan), safeStringify(fact), safeStringify(delta));
             } else if (cat.type === 'number') {
-                const plan = (typeof catData === 'object' && catData !== null) ? (parseFloat(catData.plan) || 0) : 0;
-                const fact = (typeof catData === 'object' && catData !== null) ? (parseFloat(catData.fact) || 0) : 0;
+                const plan = (typeof catData === 'object' && catData !== null && !Array.isArray(catData)) ? (parseFloat(catData.plan) || 0) : 0;
+                const fact = (typeof catData === 'object' && catData !== null && !Array.isArray(catData)) ? (parseFloat(catData.fact) || 0) : 0;
                 const delta = fact - plan;
-                row.push(plan !== 0 ? plan : '', fact !== 0 ? fact : '', delta !== 0 ? delta : '');
+                row.push(plan !== 0 ? String(plan) : '', fact !== 0 ? String(fact) : '', delta !== 0 ? String(delta) : '');
             }
         });
         
@@ -389,27 +449,27 @@ function createPersonnelSheet(data, XLSX) {
             
             if (cat.type === 'single' || cat.type === 'select') {
                 const value = typeof catData === 'object' ? (catData.value !== undefined ? catData.value : '') : catData;
-                row.push(String(value || ''));
+                row.push(safeStringify(value));
             } else if (cat.type === 'triple' || cat.type === 'quadruple') {
                 // Проверяем, что catData - объект
-                if (typeof catData === 'object' && catData !== null) {
+                if (typeof catData === 'object' && catData !== null && !Array.isArray(catData)) {
                     cat.fields.forEach(f => {
-                        const fieldValue = catData[f.n] !== undefined ? catData[f.n] : '';
-                        row.push(String(fieldValue || ''));
+                        const fieldValue = catData[f.n] !== undefined ? catData[f.n] : null;
+                        row.push(safeStringify(fieldValue));
                     });
                 } else {
                     cat.fields.forEach(() => row.push(''));
                 }
             } else if (cat.type === 'number') {
-                const plan = (typeof catData === 'object' && catData !== null) ? (parseFloat(catData.plan) || 0) : 0;
-                const fact = (typeof catData === 'object' && catData !== null) ? (parseFloat(catData.fact) || 0) : 0;
+                const plan = (typeof catData === 'object' && catData !== null && !Array.isArray(catData)) ? (parseFloat(catData.plan) || 0) : 0;
+                const fact = (typeof catData === 'object' && catData !== null && !Array.isArray(catData)) ? (parseFloat(catData.fact) || 0) : 0;
                 const delta = fact - plan;
-                row.push(plan !== 0 ? plan : '', fact !== 0 ? fact : '', delta !== 0 ? delta : '');
+                row.push(plan !== 0 ? String(plan) : '', fact !== 0 ? String(fact) : '', delta !== 0 ? String(delta) : '');
             } else if (cat.type === 'text') {
-                const value = typeof catData === 'object' ? 
+                const value = typeof catData === 'object' && !Array.isArray(catData) ? 
                     (catData.value !== undefined ? catData.value : (catData.text !== undefined ? catData.text : '')) : 
                     catData;
-                row.push(String(value || ''));
+                row.push(safeStringify(value));
             }
         });
         
