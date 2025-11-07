@@ -61,6 +61,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
+          exclude-paths: 'telegram-bot/**'
       
       - name: Deploy to GitHub Pages
         id: deployment

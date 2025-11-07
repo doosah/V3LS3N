@@ -1,0 +1,8 @@
+# Ignore HTML files - Railway should run server.js, not index.html
+index.html
+*.html
+
+# Keep server.js and required files
+!server.js
+!package.json
+!telegram-bot/
