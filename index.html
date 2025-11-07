@@ -35,6 +35,7 @@
             <h2>Выберите отчёт</h2>
             <button class="large-button" onclick="selectReport('operational')">📄 Операционные показатели</button>
             <button class="large-button" onclick="selectReport('personnel')">📄 Персонал</button>
+            <button class="large-button" onclick="selectReport('shortage')">📋 Еженедельный разбор недостач</button>
             <button class="large-button" onclick="showExportSection()">📊 Экспорт Excel</button>
             <div class="main-logo-wrapper">
                 <img src="img/logo1.png" alt="Main Logo" class="main-page-logo">
@@ -103,6 +104,78 @@
                     <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
                 </div>
             </form>
+        </div>
+
+        <div id="shortageReportSection" class="section">
+            <h2 id="shortageTitle">Еженедельный разбор недостач</h2>
+            <div class="warehouse-list" id="shortageList"></div>
+            <div class="action-buttons" style="margin-top: 20px;">
+                <button class="secondary large-button" onclick="showShortageSummarySection()">📋 Сводная таблица</button>
+                <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+            </div>
+            <div class="week-section hidden">
+                <h3>📅 Выберите неделю</h3>
+                <div class="week-input-group">
+                    <label for="weekNumber">Номер недели:</label>
+                    <input type="number" id="weekNumber" min="1" max="53" placeholder="Например: 32" inputmode="numeric">
+                    <label for="weekYear">Год:</label>
+                    <input type="number" id="weekYear" min="2024" max="2030" placeholder="2025" inputmode="numeric" value="2025">
+                </div>
+                <div id="selectedWeek" class="selected-date-display"></div>
+            </div>
+            <form id="shortageReportForm" class="hidden">
+                <div id="shortageCategoryInputs"></div>
+                <div class="action-buttons">
+                    <button type="button" onclick="saveShortageReport()">💾 Сохранить отчёт</button>
+                    <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="shortageSummarySection" class="section">
+            <div class="section-logo-top">
+                <img src="img/logo2.png" alt="Section Logo" class="section-logo-large">
+            </div>
+            <h2>📋 Сводная таблица по недостачам</h2>
+            <div class="week-section">
+                <h3>📅 Выберите неделю для анализа</h3>
+                <div class="week-input-group">
+                    <label for="shortageSummaryWeekNumber">Номер недели:</label>
+                    <input type="number" id="shortageSummaryWeekNumber" min="1" max="53" placeholder="Например: 32" inputmode="numeric">
+                    <label for="shortageSummaryWeekYear">Год:</label>
+                    <input type="number" id="shortageSummaryWeekYear" min="2024" max="2030" placeholder="2025" inputmode="numeric" value="2025">
+                </div>
+                <div id="shortageSelectedWeekDisplay" class="selected-date-display"></div>
+            </div>
+            <div class="action-buttons">
+                <button onclick="showShortageSummaryData()">📈 Показать сводные данные</button>
+                <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+            </div>
+        </div>
+
+        <div id="shortageSummaryTableSection" class="section">
+            <h2>📋 Сводная таблица по недостачам</h2>
+            <div class="date-navigation">
+                <div class="date-logo-center">
+                    <img src="img/logo4.png" alt="Logo" class="date-navigation-logo">
+                </div>
+                <div class="date-controls-right">
+                    <div class="date-display-small" id="currentShortageSummaryWeek"></div>
+                    <div class="date-arrows-right">
+                        <button type="button" class="date-arrow-btn" onclick="prevShortageSummaryWeek(); return false;">←</button>
+                        <button type="button" class="date-arrow-btn" onclick="nextShortageSummaryWeek(); return false;">→</button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="shortageSummaryTable" class="report-table">
+                    <!-- Table content will be generated here -->
+                </table>
+            </div>
+            <div class="action-buttons">
+                <button class="secondary" onclick="showShortageSummarySection()">← Назад к выбору недели</button>
+                <button class="secondary" onclick="backToMain()">← Назад к выбору отчёта</button>
+            </div>
         </div>
 
         <div id="summarySection" class="section">

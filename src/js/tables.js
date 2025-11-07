@@ -1,5 +1,5 @@
 // Модуль таблиц
-import { WAREHOUSES, CATEGORIES, PERSONNEL_CATEGORIES } from './config.js';
+import { WAREHOUSES, CATEGORIES, PERSONNEL_CATEGORIES, SHORTAGE_CATEGORIES } from './config.js';
 
 export function addRow(date, wh, typeData, typeLabel) {
     let cells = '';
@@ -198,6 +198,51 @@ export function generatePersonnelSummaryTable(personnelReports, selectedSummaryD
 
     html += '</tbody></table></div>';
     html += `<div class="summary-total">📄 Итого по Штат (план): ${totalStaffPlan}</div>`;
+    return html;
+}
+
+export function addShortageRow(weekKey, wh, data) {
+    let cells = '';
+    cells += `<td>${weekKey}</td><td>${wh}</td><td>ХА</td>`;
+
+    SHORTAGE_CATEGORIES.forEach(cat => {
+        const catData = data[cat.name] || {};
+        if (cat.type === 'single') {
+            cells += `<td>${catData.value !== undefined && catData.value !== '' ? catData.value : '-'}</td>`;
+        } else if (cat.type === 'text') {
+            const text = catData.value || '';
+            cells += `<td>${text ? (text.length > 50 ? text.substring(0, 50) + '...' : text) : '-'}</td>`;
+        } else if (cat.type === 'select') {
+            cells += `<td>${catData.value || '-'}</td>`;
+        }
+    });
+
+    return { html: `<tr>${cells}</tr>` };
+}
+
+export function generateShortageSummaryTable(shortageReports, weekKey) {
+    let html = '<thead><tr><th>Неделя</th><th>Склад</th><th>ХА</th>';
+    html += SHORTAGE_CATEGORIES.map(cat => {
+        return `<th>${cat.name}${cat.unit ? ` (${cat.unit})` : ''}</th>`;
+    }).join('') + '</tr></thead><tbody>';
+
+    const weekData = shortageReports[weekKey] || {};
+
+    WAREHOUSES.forEach(wh => {
+        const warehouseData = weekData[wh] || {};
+        if (Object.keys(warehouseData).length > 0) {
+            const rowData = addShortageRow(weekKey, wh, warehouseData);
+            html += rowData.html;
+        } else {
+            let cells = `<td>${weekKey}</td><td>${wh}</td><td>ХА</td>`;
+            for (let i = 0; i < SHORTAGE_CATEGORIES.length; i++) {
+                cells += '<td>-</td>';
+            }
+            html += `<tr>${cells}</tr>`;
+        }
+    });
+
+    html += '</tbody>';
     return html;
 }
 

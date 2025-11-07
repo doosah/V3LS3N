@@ -1,16 +1,17 @@
 ﻿// Главный модуль приложения
-import { WAREHOUSES, CATEGORIES, PERSONNEL_CATEGORIES } from './config.js';
+import { WAREHOUSES, CATEGORIES, PERSONNEL_CATEGORIES, SHORTAGE_CATEGORIES } from './config.js';
 import { syncToSupabase, loadFromSupabase, setupRealtimeSubscriptions, initSupabase } from './supabase-client.js';
 import { parseTimeToMin, cleanOldReports } from './utils.js';
 import { renderCalendar } from './calendar.js';
 import { loadCategoryInputs, loadPersonnelCategoryInputs, selectYesNo } from './forms.js';
-import { generateSummaryTable, generatePersonnelSummaryTable } from './tables.js';
+import { generateSummaryTable, generatePersonnelSummaryTable, generateShortageSummaryTable } from './tables.js';
 import { exportToExcel } from './excel-export.js';
 import { getChatId } from './telegram-bot.js';
 
 // Состояние приложения
 let reports = JSON.parse(localStorage.getItem('warehouseReports')) || {};
 let personnelReports = JSON.parse(localStorage.getItem('personnelReports')) || {};
+let shortageReports = JSON.parse(localStorage.getItem('shortageReports')) || {};
 let currentDate = new Date();
 let warehouseCalendarView = 'week';
 let summaryCalendarView = 'month';
@@ -19,10 +20,17 @@ let personnelSummaryCalendarView = 'month';
 let selectedWarehouseDate = null;
 let selectedSummaryDate = null;
 let selectedPersonnelDate = null;
+let selectedShortageWeek = null;
+let selectedShortageYear = null;
 let currentWarehouse = '';
 let currentPersonnelObj = '';
+let currentShortageWarehouse = '';
 let summaryCurrentDate = new Date();
 let personnelSummaryCurrentDate = new Date();
+let shortageWeekUpdateHandler = null; // Для хранения обработчика событий
+let selectedShortageSummaryWeek = null;
+let selectedShortageSummaryYear = null;
+let shortageSummaryInputHandler = null;
 
 // Функции чистки
 function cleanOldPersonnelReports() {
@@ -57,6 +65,19 @@ function generatePersonnelList() {
     });
 }
 
+function generateShortageList() {
+    const list = document.getElementById('shortageList');
+    if (!list) return;
+    list.innerHTML = '';
+    WAREHOUSES.forEach(wh => {
+        const btn = document.createElement('button');
+        btn.className = 'warehouse-btn';
+        btn.textContent = wh;
+        btn.onclick = () => showShortageReport(wh);
+        list.appendChild(btn);
+    });
+}
+
 // Выбор отчёта
 function selectReport(reportType) {
     document.getElementById('mainSection')?.classList.remove('active');
@@ -76,6 +97,16 @@ function selectReport(reportType) {
             document.querySelector('#personnelReportSection .date-section')?.classList.add('hidden');
             document.querySelector('#personnelReportSection .radio-group')?.classList.add('hidden');
             document.querySelector('#personnelReportSection #personnelReportForm')?.classList.add('hidden');
+            break;
+        case 'shortage':
+            document.getElementById('shortageReportSection')?.classList.add('active');
+            document.getElementById('shortageSummarySection')?.classList.remove('active');
+            document.getElementById('shortageSummaryTableSection')?.classList.remove('active');
+            generateShortageList();
+            document.querySelector('#shortageReportSection .week-section')?.classList.add('hidden');
+            document.querySelector('#shortageReportSection #shortageReportForm')?.classList.add('hidden');
+            selectedShortageSummaryWeek = null;
+            selectedShortageSummaryYear = null;
             break;
     }
 }
@@ -114,6 +145,167 @@ function showPersonnelReport(obj) {
     
     renderPersonnelCalendar();
     loadPersonnelCategoryInputs(personnelReports, currentPersonnelObj, selectedPersonnelDate);
+}
+
+// Показ отчёта по недостачам
+function showShortageReport(wh) {
+    currentShortageWarehouse = wh;
+    const title = document.getElementById('shortageTitle');
+    if (title) title.textContent = `📍 ${wh} - Еженедельный разбор недостач`;
+    
+    document.querySelector('#shortageReportSection .week-section')?.classList.remove('hidden');
+    document.querySelector('#shortageReportSection #shortageReportForm')?.classList.remove('hidden');
+    
+    // Инициализация недели и года
+    const weekInput = document.getElementById('weekNumber');
+    const yearInput = document.getElementById('weekYear');
+    if (weekInput && yearInput) {
+        const defaults = getDefaultShortageWeekInfo();
+        weekInput.value = defaults.week;
+        yearInput.value = defaults.year;
+        
+        selectedShortageWeek = weekInput.value;
+        selectedShortageYear = yearInput.value;
+        
+        const weekDisplay = document.getElementById('selectedWeek');
+        if (weekDisplay) weekDisplay.innerHTML = `<strong>Выбрано:</strong> Неделя ${selectedShortageWeek} ${selectedShortageYear} года`;
+        
+        // Удаляем предыдущие обработчики (если были)
+        if (shortageWeekUpdateHandler) {
+            weekInput.removeEventListener('input', shortageWeekUpdateHandler);
+            yearInput.removeEventListener('input', shortageWeekUpdateHandler);
+        }
+        
+        // Создаем новую функцию обработчика
+        shortageWeekUpdateHandler = () => {
+            selectedShortageWeek = weekInput.value;
+            selectedShortageYear = yearInput.value;
+            if (weekDisplay) weekDisplay.innerHTML = `<strong>Выбрано:</strong> Неделя ${selectedShortageWeek} ${selectedShortageYear} года`;
+            loadShortageCategoryInputs();
+        };
+        
+        // Добавляем новые обработчики
+        weekInput.addEventListener('input', shortageWeekUpdateHandler);
+        yearInput.addEventListener('input', shortageWeekUpdateHandler);
+    }
+    
+    loadShortageCategoryInputs();
+}
+
+// Функция получения номера недели
+function getWeekNumber(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+}
+
+function getDateFromWeek(year, week) {
+    const simple = new Date(Date.UTC(year, 0, 1 + (week - 1) * 7));
+    const dow = simple.getUTCDay();
+    const weekStart = new Date(simple);
+    if (dow <= 4) {
+        weekStart.setUTCDate(simple.getUTCDate() - (dow === 0 ? 6 : dow - 1));
+    } else {
+        weekStart.setUTCDate(simple.getUTCDate() + (8 - dow));
+    }
+    return new Date(Date.UTC(weekStart.getUTCFullYear(), weekStart.getUTCMonth(), weekStart.getUTCDate()));
+}
+
+function getWeeksInYear(year) {
+    const lastDay = new Date(Date.UTC(year, 11, 31));
+    let week = getWeekNumber(lastDay);
+    if (week === 1) {
+        const prevWeekDay = new Date(Date.UTC(year, 11, 24));
+        week = getWeekNumber(prevWeekDay);
+    }
+    return week;
+}
+
+function getDefaultShortageWeekInfo() {
+    const date = new Date();
+    date.setDate(date.getDate() - 7);
+    const year = date.getFullYear();
+    const week = getWeekNumber(date);
+    return { week, year };
+}
+
+function loadShortageCategoryInputs() {
+    if (!currentShortageWarehouse || !selectedShortageWeek || !selectedShortageYear) return;
+    
+    const weekKey = `${selectedShortageYear}-W${selectedShortageWeek}`;
+    const data = shortageReports[weekKey]?.[currentShortageWarehouse] || {};
+    
+    const div = document.getElementById('shortageCategoryInputs');
+    if (!div) return;
+    
+    div.innerHTML = '';
+    
+    SHORTAGE_CATEGORIES.forEach(cat => {
+        const catData = data[cat.name] || {};
+        const cd = document.createElement('div');
+        cd.className = 'category-input';
+        let html = `<h4>${cat.name}</h4>`;
+        
+        if (cat.type === 'single') {
+            html += `<div><label>${cat.label}${cat.unit ? ` (${cat.unit})` : ''}:</label><input type="number" id="shortage_${currentShortageWarehouse}_${cat.name}_value" placeholder="${cat.label}" inputmode="numeric" value="${catData.value || ''}"></div>`;
+        } else if (cat.type === 'text') {
+            html += `<div><label>${cat.name}:</label><textarea id="shortage_${currentShortageWarehouse}_${cat.name}_value" placeholder="${cat.name}" rows="3">${catData.value || ''}</textarea></div>`;
+        } else if (cat.type === 'select') {
+            html += `<div><label>${cat.name}:</label><select id="shortage_${currentShortageWarehouse}_${cat.name}_value"><option value="">-- Не выбрано --</option>`;
+            cat.options.forEach(opt => html += `<option value="${opt}" ${catData.value === opt ? 'selected' : ''}>${opt}</option>`);
+            html += `</select></div>`;
+        }
+        
+        cd.innerHTML = html;
+        div.appendChild(cd);
+    });
+}
+
+// Сохранение отчёта по недостачам
+function saveShortageReport() {
+    if (!currentShortageWarehouse || !selectedShortageWeek || !selectedShortageYear) {
+        alert('Выберите склад и неделю');
+        return;
+    }
+    
+    const weekKey = `${selectedShortageYear}-W${selectedShortageWeek}`;
+    if (!shortageReports[weekKey]) shortageReports[weekKey] = {};
+    if (!shortageReports[weekKey][currentShortageWarehouse]) shortageReports[weekKey][currentShortageWarehouse] = {};
+    
+    const reportData = {};
+    
+    SHORTAGE_CATEGORIES.forEach(cat => {
+        const inputId = `shortage_${currentShortageWarehouse}_${cat.name}_value`;
+        const input = document.getElementById(inputId);
+        if (input) {
+            if (cat.type === 'text') {
+                reportData[cat.name] = { value: input.value.trim() };
+            } else if (cat.type === 'select') {
+                reportData[cat.name] = { value: input.value };
+            } else {
+                const val = input.value.trim();
+                reportData[cat.name] = { value: val ? parseFloat(val) : '' };
+            }
+        }
+    });
+    
+    shortageReports[weekKey][currentShortageWarehouse] = reportData;
+    localStorage.setItem('shortageReports', JSON.stringify(shortageReports));
+    
+    // Синхронизация с Supabase
+    syncShortageToSupabase(currentShortageWarehouse, selectedShortageYear, selectedShortageWeek, reportData);
+    
+    alert('✅ Отчёт сохранён!');
+}
+
+async function syncShortageToSupabase(warehouse, year, week, data) {
+    try {
+        await syncToSupabase('shortage', `${year}-W${week}`, warehouse, null, data);
+    } catch (error) {
+        console.error('Ошибка синхронизации отчета о недостачах:', error);
+    }
 }
 
 // Календарь склада
@@ -436,19 +628,149 @@ function nextPersonnelSummaryDay() {
     showPersonnelSummaryData();
 }
 
+// Функции для сводной таблицы по недостачам
+function showShortageSummarySection() {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('shortageSummarySection')?.classList.add('active');
+
+    const weekInput = document.getElementById('shortageSummaryWeekNumber');
+    const yearInput = document.getElementById('shortageSummaryWeekYear');
+    if (weekInput && yearInput) {
+        if (!selectedShortageSummaryWeek || !selectedShortageSummaryYear) {
+            const defaults = getDefaultShortageWeekInfo();
+            selectedShortageSummaryWeek = String(defaults.week);
+            selectedShortageSummaryYear = String(defaults.year);
+        }
+
+        weekInput.value = selectedShortageSummaryWeek;
+        yearInput.value = selectedShortageSummaryYear;
+        updateShortageSummarySelectedDisplay();
+
+        if (shortageSummaryInputHandler) {
+            weekInput.removeEventListener('input', shortageSummaryInputHandler);
+            yearInput.removeEventListener('input', shortageSummaryInputHandler);
+        }
+
+        shortageSummaryInputHandler = () => {
+            selectedShortageSummaryWeek = weekInput.value;
+            selectedShortageSummaryYear = yearInput.value;
+            updateShortageSummarySelectedDisplay();
+        };
+
+        weekInput.addEventListener('input', shortageSummaryInputHandler);
+        yearInput.addEventListener('input', shortageSummaryInputHandler);
+    }
+}
+
+function updateShortageSummarySelectedDisplay() {
+    const display = document.getElementById('shortageSelectedWeekDisplay');
+    if (display) {
+        display.innerHTML = `<strong>Выбрано:</strong> Неделя ${selectedShortageSummaryWeek || '-'} ${selectedShortageSummaryYear || ''} года`;
+    }
+}
+
+async function showShortageSummaryData() {
+    const weekInput = document.getElementById('shortageSummaryWeekNumber');
+    const yearInput = document.getElementById('shortageSummaryWeekYear');
+
+    if (!weekInput || !yearInput || !weekInput.value || !yearInput.value) {
+        alert('Выберите неделю и год');
+        return;
+    }
+
+    selectedShortageSummaryWeek = weekInput.value;
+    selectedShortageSummaryYear = yearInput.value;
+    updateShortageSummarySelectedDisplay();
+
+    await updateShortageSummaryTable(parseInt(selectedShortageSummaryYear, 10), parseInt(selectedShortageSummaryWeek, 10));
+
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('shortageSummaryTableSection')?.classList.add('active');
+}
+
+async function updateShortageSummaryTable(year, week) {
+    const normalizedWeek = String(week);
+    const normalizedYear = String(year);
+
+    const weekDisplay = document.getElementById('currentShortageSummaryWeek');
+    if (weekDisplay) weekDisplay.textContent = `Неделя ${normalizedWeek} ${normalizedYear} года`;
+
+    const weekInput = document.getElementById('shortageSummaryWeekNumber');
+    const yearInput = document.getElementById('shortageSummaryWeekYear');
+    if (weekInput) weekInput.value = normalizedWeek;
+    if (yearInput) yearInput.value = normalizedYear;
+
+    selectedShortageSummaryWeek = weekInput ? weekInput.value : normalizedWeek;
+    selectedShortageSummaryYear = yearInput ? yearInput.value : normalizedYear;
+    updateShortageSummarySelectedDisplay();
+
+    await loadFromSupabase(reports, personnelReports, shortageReports);
+
+    const table = document.getElementById('shortageSummaryTable');
+    if (table) {
+        const weekKey = `${selectedShortageSummaryYear}-W${selectedShortageSummaryWeek}`;
+        table.innerHTML = generateShortageSummaryTable(shortageReports, weekKey);
+    }
+}
+
+async function prevShortageSummaryWeek() {
+    await changeShortageSummaryWeek(-1);
+}
+
+async function nextShortageSummaryWeek() {
+    await changeShortageSummaryWeek(1);
+}
+
+async function changeShortageSummaryWeek(offset) {
+    if (!selectedShortageSummaryWeek || !selectedShortageSummaryYear) return;
+
+    let week = parseInt(selectedShortageSummaryWeek, 10);
+    let year = parseInt(selectedShortageSummaryYear, 10);
+
+    week += offset;
+    let weeksInYear = getWeeksInYear(year);
+
+    if (week < 1) {
+        year -= 1;
+        weeksInYear = getWeeksInYear(year);
+        week = weeksInYear;
+    } else if (week > weeksInYear) {
+        year += 1;
+        week = 1;
+    }
+
+    await updateShortageSummaryTable(year, week);
+}
+
 // Полнэкранная таблица
-function toggleFullScreen() {
-    const fs = document.getElementById('fullScreenTable');
-    const tbl = document.getElementById('summaryTable')?.innerHTML;
-    if (!fs || !tbl) return;
+function toggleFullScreen(sectionId) {
+    if (!sectionId) {
+        // Старый способ для обратной совместимости
+        const fs = document.getElementById('fullScreenTable');
+        const tbl = document.getElementById('summaryTable')?.innerHTML;
+        if (!fs || !tbl) return;
+        
+        if (fs.style.display === 'none') {
+            document.getElementById('fullSummaryTable').innerHTML = tbl;
+            fs.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        } else {
+            fs.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        return;
+    }
     
-    if (fs.style.display === 'none') {
-        document.getElementById('fullSummaryTable').innerHTML = tbl;
-        fs.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    } else {
-        fs.style.display = 'none';
+    // Новый способ - работаем с секцией напрямую
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+    
+    if (section.classList.contains('fullscreen')) {
+        section.classList.remove('fullscreen');
         document.body.style.overflow = 'auto';
+    } else {
+        section.classList.add('fullscreen');
+        document.body.style.overflow = 'hidden';
     }
 }
 
@@ -699,6 +1021,7 @@ try {
     window.toggleCalendarViewPersonnel = toggleCalendarViewPersonnel;
     window.saveWarehouseReport = saveWarehouseReport;
     window.savePersonnelReport = savePersonnelReport;
+    window.saveShortageReport = saveShortageReport;
     window.selectYesNo = selectYesNo;
     window.updateSummaryTable = updateSummaryTable;
     window.showSummaryData = showSummaryData;
@@ -718,6 +1041,10 @@ try {
     window.prevPersonnelSummaryDay = prevPersonnelSummaryDay;
     window.nextPersonnelSummaryDay = nextPersonnelSummaryDay;
     window.togglePersonnelFullScreen = togglePersonnelFullScreen;
+    window.showShortageSummarySection = showShortageSummarySection;
+    window.showShortageSummaryData = showShortageSummaryData;
+    window.prevShortageSummaryWeek = prevShortageSummaryWeek;
+    window.nextShortageSummaryWeek = nextShortageSummaryWeek;
     window.showExportSection = showExportSection;
     window.performExport = performExport;
     
@@ -753,11 +1080,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         );
 
         // Загружаем данные из Supabase (не блокируем загрузку если ошибка)
-        try {
-            await loadFromSupabase(reports, personnelReports);
-        } catch (error) {
-            console.error('Ошибка загрузки из Supabase:', error);
-        }
+               try {
+                   await loadFromSupabase(reports, personnelReports, shortageReports);
+               } catch (error) {
+                   console.error('Ошибка загрузки из Supabase:', error);
+               }
         
         cleanOldReports(reports);
         localStorage.setItem('warehouseReports', JSON.stringify(reports));
@@ -765,16 +1092,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         generateWarehouseList();
         generatePersonnelList();
+        generateShortageList();
         renderWarehouseCalendar();
         renderPersonnelCalendar();
         renderSummaryCalendar();
         renderPersonnelSummaryCalendar();
         
-        try {
-            setupRealtimeSubscriptions(() => loadFromSupabase(reports, personnelReports));
-        } catch (error) {
-            console.error('Ошибка настройки realtime:', error);
-        }
+               try {
+                   setupRealtimeSubscriptions(() => loadFromSupabase(reports, personnelReports, shortageReports));
+               } catch (error) {
+                   console.error('Ошибка настройки realtime:', error);
+               }
         
         // Инициализация плашки с информацией о последнем обновлении
         initUpdateBadge();

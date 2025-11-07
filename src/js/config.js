@@ -38,7 +38,7 @@ export const PERSONNEL_OBJECTS = WAREHOUSES;
 
 export const PERSONNEL_CATEGORIES = [
     {name: 'Штат', type: 'number'},
-    {name: 'Ozon Job', type: 'quadruple', fields: [{n: 'План', u: ''}, {n: 'Факт', u: ''}, {n: 'Капац.', u: ''}, {n: 'Доля', u: '%'}]},
+    {name: 'Ozon Job', type: 'quadruple', fields: [{n: 'План', u: ''}, {n: 'Факт', u: ''}, {n: 'Капац.', u: ''}, {n: 'Доля OJ', u: '%'}]},
     {name: 'РВ', type: 'single', label: 'Значение', unit: ''},
     {name: 'Командировка', type: 'single', label: 'Значение', unit: ''},
     {name: 'Total', type: 'number'},
@@ -46,4 +46,31 @@ export const PERSONNEL_CATEGORIES = [
     {name: 'Причины невыхода', type: 'triple', fields: [{n: 'ОТ', u: ''}, {n: 'БЛ', u: ''}, {n: 'НН', u: ''}]},
     {name: 'Комментарии', type: 'text'},
     {name: 'Руководитель', type: 'select', options: ['Территория 1 Шутин Д.М.', 'Территория 2 Любавкская М.И.']}
+];
+
+export const SHORTAGE_CATEGORIES = [
+    {name: 'Общ. стоимость недостач из свода', type: 'single', label: 'Стоимость', unit: 'руб.'},
+    {name: 'Кол-во недостач из свода', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Общ. стоимость недостач на момент отчета', type: 'single', label: 'Стоимость', unit: 'руб.'},
+    {name: 'Кол-во недостач на момент отчета', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Общ. стоимость потерь с ячеек приёмки', type: 'single', label: 'Стоимость', unit: 'руб.'},
+    {name: 'Кол-во потерь с ячеек приёмки', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Общ. стоимость потерь с ячейки Автоприём', type: 'single', label: 'Стоимость', unit: 'руб.'},
+    {name: 'Кол-во потерь с ячейки Автоприём', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Кол-во утерянных лог. контейнеров', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Кол-во постигов в заявках 2ШК', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Общ. стоимость постигов в заявках 2ШК', type: 'single', label: 'Стоимость', unit: 'руб.'},
+    {name: 'Кол-во засылов', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Общ. стоимость засылов', type: 'single', label: 'Стоимость', unit: 'руб.'},
+    {name: 'Кол-во ячеек с автопересчётом', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Общ. стоимость недостач по автопересчётам', type: 'single', label: 'Стоимость', unit: 'руб.'},
+    {name: 'Кол-во недостач по автопересчётам', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Общ. стоимость обезлички вытащенной из недостач', type: 'single', label: 'Стоимость', unit: 'руб.'},
+    {name: 'Кол-во обезлички вытащенной из недостач', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'БЛ обезлички в шт', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Кол-во недостач оставшихся к разбору', type: 'single', label: 'Количество', unit: 'шт'},
+    {name: 'Общ. сумма недостач оставшихся к разбору', type: 'single', label: 'Сумма', unit: 'руб.'},
+    {name: 'Подробный комментарий причин возникновения недостач.', type: 'text'},
+    {name: 'План действий', type: 'text'},
+    {name: 'Сроки устранения', type: 'select', options: ['без критики', '7 дней', '14 дней']}
 ];

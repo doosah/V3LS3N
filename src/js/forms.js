@@ -151,7 +151,7 @@ export function loadPersonnelCategoryInputs(personnelReports, currentPersonnelOb
 function updateOzonJobShare(currentPersonnelObj, type) {
     const ozonFactEl = document.getElementById(`${currentPersonnelObj}_${type}_Ozon Job_Факт`);
     const totalFactEl = document.getElementById(`${currentPersonnelObj}_${type}_Total_fact`);
-    const shareEl = document.getElementById(`${currentPersonnelObj}_${type}_Ozon Job_Доля`);
+    const shareEl = document.getElementById(`${currentPersonnelObj}_${type}_Ozon Job_Доля OJ`);
     
     if (!ozonFactEl || !totalFactEl || !shareEl) return;
     
