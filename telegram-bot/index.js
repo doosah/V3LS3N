@@ -125,13 +125,12 @@ async function sendTelegramPhoto(buffer, caption = '', chatId = TELEGRAM_CHAT_ID
         
         const formData = new FormData();
         
-        // Отправляем как документ с превью - это работает надежнее
+        // Отправляем как документ (Telegram допускает до 50 МБ для изображений в документах)
         formData.append('chat_id', chatId);
         formData.append('document', buffer, {
             filename: 'table.png',
             contentType: 'image/png'
         });
-        formData.append('thumb', buffer); // Превью для отображения как фото
         if (caption) {
             formData.append('caption', caption);
             formData.append('parse_mode', 'HTML');
